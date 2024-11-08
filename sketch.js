@@ -4,14 +4,18 @@ let clearButton;
 let slider;
 let xoff = 0;
 function setup() {
-  createCanvas(800, 800);
+  let canvas = createCanvas(800, 800);
+  canvas.parent('canvasContainer');
   angleMode(DEGREES);
   background(0);
-  saveButton = createButton("save");
+
+  saveButton = select("#saveButton");
   saveButton.mousePressed(saveSnowflake);
-  clearButton = createButton("clear");
+
+  clearButton = select("#clearButton");
   clearButton.mousePressed(clearCanvas);
-  slider = createSlider(1, 32, 4, 0.1);
+
+  slider = select("#slider");
   colorMode(HSB, 255, 255);
 }
 
