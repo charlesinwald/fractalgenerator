@@ -22,6 +22,16 @@
           <option value="4">4</option>
           <option value="6" selected>6</option>
         </select>
+        <label for="colorModeSelect">Color Mode:</label>
+        <select id="colorModeSelect">
+          <option value="rainbow" selected>Rainbow</option>
+          <option value="gradient">Gradient</option>
+          <option value="solid">Solid</option>
+        </select>
+        <div id="colorPickerContainer">
+          <label for="colorPicker">Choose Color:</label>
+          <input type="color" id="colorPicker" value="#4ECDC4">
+        </div>
         <label for="slider">Stroke Weight:</label>
         <input type="range" id="slider" min="1" max="32" step="0.1" value="4">
         <button id="saveButton">Save</button>
