@@ -2,6 +2,7 @@ let symmetry = 6;
 let saveButton;
 let clearButton;
 let slider;
+let symmetrySelect;
 let xoff = 0;
 function setup() {
   let canvas = createCanvas(800, 800);
@@ -16,6 +17,10 @@ function setup() {
   clearButton.mousePressed(clearCanvas);
 
   slider = select("#slider");
+  
+  symmetrySelect = select("#symmetrySelect");
+  symmetrySelect.changed(updateSymmetry);
+  
   colorMode(HSB, 255, 255);
 }
 
@@ -25,6 +30,10 @@ function saveSnowflake() {
 
 function clearCanvas() {
   background(0);
+}
+
+function updateSymmetry() {
+  symmetry = int(symmetrySelect.value());
 }
 
 function draw() {
@@ -40,7 +49,7 @@ function draw() {
       //stroke weight
       stroke(hu, 255, 255, 255);
       let angle = 360 / symmetry;
-      for (let i = 0; i < 12; i++) {
+      for (let i = 0; i < symmetry; i++) {
         rotate(angle);
         let sw = slider.value();
         strokeWeight(sw);
