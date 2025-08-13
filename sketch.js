@@ -170,14 +170,16 @@ function toggleAnimation() {
     }
     // Clear canvas when starting animation
     background(0);
-    animateButton.textContent = "Stop Animation";
+    animateButton.querySelector('i').className = "fas fa-stop";
+    animateButton.title = "Stop Animation";
   } else {
-    animateButton.textContent = "Start Animation";
+    animateButton.querySelector('i').className = "fas fa-play";
+    animateButton.title = "Start Animation";
   }
 }
 
 function setup() {
-  // Make canvas responsive with different dimensions for mobile
+  // Make canvas responsive to container size
   let canvasWidth, canvasHeight;
 
   if (windowWidth <= 768) {
@@ -185,8 +187,11 @@ function setup() {
     canvasWidth = windowWidth - 30;
     canvasHeight = windowHeight * 0.6;
   } else {
-    // Desktop: square canvas
-    canvasWidth = canvasHeight = 600;
+    // Desktop: fit within container, accounting for padding and controls
+    let availableWidth = windowWidth - 350; // 280px controls + margins
+    let availableHeight = windowHeight - 120; // title + margins
+    let size = min(availableWidth, availableHeight - 40); // extra margin
+    canvasWidth = canvasHeight = max(400, min(size, 600));
   }
 
   let canvas = createCanvas(canvasWidth, canvasHeight);
@@ -297,8 +302,11 @@ function windowResized() {
     canvasWidth = windowWidth - 30;
     canvasHeight = windowHeight * 0.6;
   } else {
-    // Desktop: square canvas
-    canvasWidth = canvasHeight = 600;
+    // Desktop: fit within container, accounting for padding and controls
+    let availableWidth = windowWidth - 350; // 280px controls + margins
+    let availableHeight = windowHeight - 120; // title + margins
+    let size = min(availableWidth, availableHeight - 40); // extra margin
+    canvasWidth = canvasHeight = max(400, min(size, 600));
   }
 
   resizeCanvas(canvasWidth, canvasHeight);
@@ -329,7 +337,8 @@ function clearCanvas() {
   zoomLevel = 1.0;
   kaleidoscopeAngle = 0;
   if (animateButton) {
-    animateButton.textContent = "Start Animation";
+    animateButton.querySelector('i').className = "fas fa-play";
+    animateButton.title = "Start Animation";
   }
   if (subtitleElement) {
     subtitleElement.style("display", "block");

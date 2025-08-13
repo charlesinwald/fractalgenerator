@@ -3,6 +3,7 @@
   <head>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.min.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   </head>
@@ -41,7 +42,7 @@
         <input type="range" id="slider" min="1" max="32" step="0.1" value="4">
         <label for="animationModeSelect">Animation Mode:</label>
         <select id="animationModeSelect">
-          <option value="auto_draw" selected>Auto Draw</option>
+          <!-- <option value="auto_draw" selected>Auto Draw</option> -->
           <option value="rotate">Rotating Canvas</option>
           <option value="pulse">Pulsing</option>
           <option value="particles">Particle System</option>
@@ -68,10 +69,20 @@
           <input type="checkbox" id="trailsEnabled">
           <label for="trailsEnabled">Enable Trails</label>
         </div>
-        <button id="animateButton">Start Animation</button>
-        <button id="randomizeButton" onclick="randomizeFractal()">Randomize</button>
-        <button id="saveButton">Save</button>
-        <button id="clearButton">Clear</button>
+        <div class="button-row">
+          <button id="animateButton" title="Start/Stop Animation">
+            <i class="fas fa-play"></i>
+          </button>
+          <button id="randomizeButton" onclick="randomizeFractal()" title="Generate Random Fractal">
+            <i class="fas fa-dice"></i>
+          </button>
+          <button id="saveButton" title="Save as Image">
+            <i class="fas fa-download"></i>
+          </button>
+          <button id="clearButton" title="Clear Canvas">
+            <i class="fas fa-eraser"></i>
+          </button>
+        </div>
       </div>
     </div>
   </body>
