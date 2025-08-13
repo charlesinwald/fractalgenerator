@@ -22,7 +22,7 @@ let showInstructions = true;
 let subtitleElement;
 
 function setup() {
-  let canvas = createCanvas(800, 800);
+  let canvas = createCanvas(600, 600);
   canvas.parent("canvasContainer");
   angleMode(DEGREES);
   background(0);
