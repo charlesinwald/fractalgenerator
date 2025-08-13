@@ -22,7 +22,9 @@ let showInstructions = true;
 let subtitleElement;
 
 function setup() {
-  let canvas = createCanvas(600, 600);
+  let canvasContainer = select("#canvasContainer");
+  let canvasSize = canvasContainer.width;
+  let canvas = createCanvas(canvasSize, canvasSize);
   canvas.parent("canvasContainer");
   angleMode(DEGREES);
   background(0);
@@ -52,6 +54,16 @@ function setup() {
 
   // Draw initial instructions
   drawInstructions();
+}
+
+function windowResized() {
+  let canvasContainer = select("#canvasContainer");
+  let canvasSize = canvasContainer.width;
+  resizeCanvas(canvasSize, canvasSize);
+  background(0);
+  if (showInstructions) {
+    drawInstructions();
+  }
 }
 
 function saveSnowflake() {
