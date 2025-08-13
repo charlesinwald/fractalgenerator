@@ -22,9 +22,19 @@ let showInstructions = true;
 let subtitleElement;
 
 function setup() {
-  let canvasContainer = select("#canvasContainer");
-  let canvasSize = canvasContainer.width;
-  let canvas = createCanvas(canvasSize, canvasSize);
+  // Make canvas responsive with different dimensions for mobile
+  let canvasWidth, canvasHeight;
+  
+  if (windowWidth <= 768) {
+    // Mobile: use most of screen width and height
+    canvasWidth = windowWidth - 30;
+    canvasHeight = windowHeight * 0.6;
+  } else {
+    // Desktop: square canvas
+    canvasWidth = canvasHeight = 600;
+  }
+  
+  let canvas = createCanvas(canvasWidth, canvasHeight);
   canvas.parent("canvasContainer");
   angleMode(DEGREES);
   background(0);
@@ -57,9 +67,19 @@ function setup() {
 }
 
 function windowResized() {
-  let canvasContainer = select("#canvasContainer");
-  let canvasSize = canvasContainer.width;
-  resizeCanvas(canvasSize, canvasSize);
+  // Recalculate canvas dimensions on resize
+  let canvasWidth, canvasHeight;
+  
+  if (windowWidth <= 768) {
+    // Mobile: use most of screen width and height
+    canvasWidth = windowWidth - 30;
+    canvasHeight = windowHeight * 0.6;
+  } else {
+    // Desktop: square canvas
+    canvasWidth = canvasHeight = 600;
+  }
+  
+  resizeCanvas(canvasWidth, canvasHeight);
   background(0);
   if (showInstructions) {
     drawInstructions();
