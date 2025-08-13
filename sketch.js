@@ -26,8 +26,7 @@ let subtitleElement;
 
 // Animation variables
 let isAnimating = false;
-let animationMode = "auto_draw";
-let autoDrawAngle = 0;
+let animationMode = "rotate";
 let rotationAngle = 0;
 let morphTimer = 0;
 let drawingPaths = [];
@@ -43,6 +42,7 @@ let zoomLevel = 1.0;
 let zoomDirection = 1;
 let particles = [];
 let kaleidoscopeAngle = 0;
+let animationAngle = 0;
 let combineEffects = false;
 let combineCheckbox;
 let secondaryEffect = "none";
@@ -336,6 +336,7 @@ function clearCanvas() {
   spiralRadius = 0;
   zoomLevel = 1.0;
   kaleidoscopeAngle = 0;
+  animationAngle = 0;
   if (animateButton) {
     animateButton.querySelector('i').className = "fas fa-play";
     animateButton.title = "Start Animation";
@@ -349,6 +350,7 @@ function clearCanvas() {
 function drawInstructions() {
   if (showInstructions) {
     push();
+    colorMode(RGB, 255, 255, 255, 255);
     fill(255, 255, 255, 200);
     textAlign(CENTER, CENTER);
     textSize(32);
@@ -391,7 +393,7 @@ function updateAnimationMode() {
   spiralRadius = 0;
   zoomLevel = 1.0;
   kaleidoscopeAngle = 0;
-  autoDrawAngle = 0;
+  animationAngle = 0;
   if (!trailsEnabled) {
     background(0);
   }
@@ -452,62 +454,60 @@ function draw() {
       pop();
     } else if (
       animationMode === "particles" ||
-      animationMode === "kaleidoscope" ||
       animationMode === "spiral"
     ) {
-      // These modes need clearing for clean animation
+      // Only particles and spiral need clearing for clean animation
+      // Kaleidoscope can work with manual drawing
       background(0);
     }
 
     drawAnimation();
   }
 
-  // Handle manual drawing (only when not animating)
-  if (!isAnimating) {
-    push();
-    translate(width / 2, height / 2);
+  // Handle manual drawing (works with or without animation)
+  push();
+  translate(width / 2, height / 2);
 
-    if (mouseX > 0 && mouseX < width && mouseY > 0 && mouseY < height) {
-      let mx = mouseX - width / 2;
-      let my = mouseY - height / 2;
-      let pmx = pmouseX - width / 2;
-      let pmy = pmouseY - height / 2;
-      if (mouseIsPressed) {
-        xoff += 1;
-        //stroke weight
-        let strokeColor = getStrokeColor();
-        if (currentColorMode === "rainbow") {
-          colorMode(HSB, 255, 255);
-          stroke(
-            strokeColor[0],
-            strokeColor[1],
-            strokeColor[2],
-            strokeColor[3]
-          );
-        } else {
-          colorMode(RGB);
-          stroke(
-            strokeColor[0],
-            strokeColor[1],
-            strokeColor[2],
-            strokeColor[3]
-          );
-        }
-        let angle = 360 / symmetry;
-        for (let i = 0; i < symmetry; i++) {
-          rotate(angle);
-          let sw = slider.value();
-          strokeWeight(sw);
-          line(mx, my, pmx, pmy);
-          push();
-          scale(-1, 1);
-          line(mx, my, pmx, pmy);
-          pop();
-        }
+  if (mouseX > 0 && mouseX < width && mouseY > 0 && mouseY < height) {
+    let mx = mouseX - width / 2;
+    let my = mouseY - height / 2;
+    let pmx = pmouseX - width / 2;
+    let pmy = pmouseY - height / 2;
+    if (mouseIsPressed) {
+      xoff += 1;
+      //stroke weight
+      let strokeColor = getStrokeColor();
+      if (currentColorMode === "rainbow") {
+        colorMode(HSB, 255, 255);
+        stroke(
+          strokeColor[0],
+          strokeColor[1],
+          strokeColor[2],
+          strokeColor[3]
+        );
+      } else {
+        colorMode(RGB);
+        stroke(
+          strokeColor[0],
+          strokeColor[1],
+          strokeColor[2],
+          strokeColor[3]
+        );
+      }
+      let angle = 360 / symmetry;
+      for (let i = 0; i < symmetry; i++) {
+        rotate(angle);
+        let sw = slider.value();
+        strokeWeight(sw);
+        line(mx, my, pmx, pmy);
+        push();
+        scale(-1, 1);
+        line(mx, my, pmx, pmy);
+        pop();
       }
     }
-    pop();
   }
+  pop();
 }
 
 function drawAnimation() {
@@ -521,9 +521,6 @@ function drawAnimation() {
 
   // Main animation mode
   switch (animationMode) {
-    case "auto_draw":
-      drawAutoAnimation();
-      break;
     case "rotate":
       drawRotateAnimation();
       break;
@@ -574,99 +571,73 @@ function applySecondaryEffect() {
   }
 }
 
-function drawAutoAnimation() {
-  // Enhanced auto draw with more complex patterns
-  let radius = min(width, height) * 0.3;
-  let complexity = sin(autoDrawAngle * 0.5) * 2 + 3;
-
-  for (let j = 0; j < complexity; j++) {
-    let offsetAngle = autoDrawAngle + (j * TWO_PI) / complexity;
-    let x1 = cos(offsetAngle) * radius * (0.3 + sin(autoDrawAngle * 2) * 0.2);
-    let y1 = sin(offsetAngle) * radius * (0.3 + cos(autoDrawAngle * 2) * 0.2);
-    let x2 =
-      cos(offsetAngle + PI / 3) * radius * (0.6 + sin(autoDrawAngle * 3) * 0.3);
-    let y2 =
-      sin(offsetAngle + PI / 3) * radius * (0.6 + cos(autoDrawAngle * 3) * 0.3);
-
-    xoff += 0.5;
-
-    let strokeColor = getStrokeColor();
-    if (currentColorMode === "rainbow") {
-      colorMode(HSB, 255, 255);
-      stroke(strokeColor[0], strokeColor[1], strokeColor[2], 200);
-    } else {
-      colorMode(RGB);
-      stroke(strokeColor[0], strokeColor[1], strokeColor[2], 200);
-    }
-
-    let angle = 360 / symmetry;
-    strokeWeight(slider.value() * (0.5 + sin(autoDrawAngle * 4) * 0.5));
-
-    for (let i = 0; i < symmetry; i++) {
-      push();
-      rotate(i * angle);
-      line(x1, y1, x2, y2);
-      push();
-      scale(-1, 1);
-      line(x1, y1, x2, y2);
-      pop();
-      pop();
-    }
-  }
-
-  autoDrawAngle += 0.02 * animationSpeed;
-}
 
 function drawRotateAnimation() {
-  // Save current drawing to frame buffer
-  if (frameCount % 2 === 0) {
-    frameBuffer.push();
-    frameBuffer.translate(frameBuffer.width / 2, frameBuffer.height / 2);
-    frameBuffer.rotate(2 * animationSpeed);
-    frameBuffer.translate(-frameBuffer.width / 2, -frameBuffer.height / 2);
-    frameBuffer.image(get(), 0, 0);
-    frameBuffer.pop();
-
-    // Display rotated image
-    push();
-    translate(-width / 2, -height / 2);
-    image(frameBuffer, 0, 0);
-    pop();
+  // Apply gentle rotation effect to the whole canvas view
+  push();
+  translate(width / 2, height / 2);
+  rotate(frameCount * 0.3 * animationSpeed);
+  translate(-width / 2, -height / 2);
+  
+  // Create a subtle rotating overlay effect
+  push();
+  translate(width / 2, height / 2);
+  noFill();
+  let strokeColor = getStrokeColor();
+  if (currentColorMode === "rainbow") {
+    colorMode(HSB, 255, 255);
+    stroke(strokeColor[0], strokeColor[1], strokeColor[2], 50);
+  } else {
+    colorMode(RGB);
+    stroke(strokeColor[0], strokeColor[1], strokeColor[2], 50);
   }
-
-  // Continue drawing new elements
-  drawAutoAnimation();
+  strokeWeight(1);
+  
+  for (let i = 0; i < 3; i++) {
+    let radius = 50 + i * 40;
+    let angle = 360 / symmetry;
+    for (let j = 0; j < symmetry; j++) {
+      push();
+      rotate(j * angle + frameCount * (i + 1) * 0.5);
+      ellipse(radius, 0, 20, 20);
+      pop();
+    }
+  }
+  pop();
+  
+  pop();
 }
 
 function drawPulseAnimation() {
   push();
-  scale(pulseScale);
+  translate(width / 2, height / 2);
 
-  // Draw pulsing circles
+  // Draw subtle pulsing background elements
   noFill();
   xoff += 1;
   let strokeColor = getStrokeColor();
   if (currentColorMode === "rainbow") {
     colorMode(HSB, 255, 255);
-    stroke(strokeColor[0], strokeColor[1], strokeColor[2], 150);
+    stroke(strokeColor[0], strokeColor[1], strokeColor[2], 80);
   } else {
     colorMode(RGB);
-    stroke(strokeColor[0], strokeColor[1], strokeColor[2], 150);
+    stroke(strokeColor[0], strokeColor[1], strokeColor[2], 80);
   }
 
-  strokeWeight(slider.value());
+  strokeWeight(2);
 
-  for (let i = 0; i < 5; i++) {
-    let radius = (i + 1) * 50 * pulseScale;
+  for (let i = 0; i < 3; i++) {
+    let radius = (i + 1) * 60 * pulseScale;
     let angle = 360 / symmetry;
 
     for (let j = 0; j < symmetry; j++) {
       push();
-      rotate(j * angle + autoDrawAngle * (i + 1));
-      arc(0, 0, radius, radius, 0, 60);
+      rotate(j * angle + animationAngle * (i + 1));
+      // Draw subtle arcs that don't interfere with manual drawing
+      arc(0, 0, radius, radius, 0, 30);
       push();
       scale(-1, 1);
-      arc(0, 0, radius, radius, 0, 60);
+      arc(0, 0, radius, radius, 0, 30);
       pop();
       pop();
     }
@@ -674,11 +645,11 @@ function drawPulseAnimation() {
 
   pop();
 
-  pulseScale += pulseDirection * 0.01 * animationSpeed;
-  if (pulseScale > 1.5 || pulseScale < 0.5) {
+  pulseScale += pulseDirection * 0.008 * animationSpeed;
+  if (pulseScale > 1.3 || pulseScale < 0.7) {
     pulseDirection *= -1;
   }
-  autoDrawAngle += 1 * animationSpeed;
+  animationAngle += 0.8 * animationSpeed;
 }
 
 function drawParticleAnimation() {
@@ -762,47 +733,51 @@ function drawKaleidoscopeAnimation() {
 }
 
 function drawWaveAnimation() {
+  push();
+  translate(width / 2, height / 2);
+  
   waveOffset += 0.05 * animationSpeed;
 
-  let waveHeight = 50;
-  let waveLength = 100;
-  let numWaves = 5;
+  let waveHeight = 30;
+  let waveLength = 80;
+  let numWaves = 3;
 
   xoff += 1;
   let strokeColor = getStrokeColor();
   if (currentColorMode === "rainbow") {
     colorMode(HSB, 255, 255);
-    stroke(strokeColor[0], strokeColor[1], strokeColor[2], 150);
+    stroke(strokeColor[0], strokeColor[1], strokeColor[2], 100);
   } else {
     colorMode(RGB);
-    stroke(strokeColor[0], strokeColor[1], strokeColor[2], 150);
+    stroke(strokeColor[0], strokeColor[1], strokeColor[2], 100);
   }
 
-  strokeWeight(slider.value());
+  strokeWeight(1);
   noFill();
 
   for (let w = 0; w < numWaves; w++) {
     push();
-    rotate(autoDrawAngle + w * 15);
+    rotate(animationAngle + w * 20);
 
     let angle = 360 / symmetry;
     for (let i = 0; i < symmetry; i++) {
       push();
       rotate(i * angle);
 
+      // Draw subtle wave patterns that complement manual drawing
       beginShape();
-      for (let x = -waveLength; x <= waveLength; x += 5) {
-        let y = sin((x + waveOffset * 20) * 0.05) * waveHeight * (1 + w * 0.2);
-        vertex(x + w * 20, y);
+      for (let x = -waveLength; x <= waveLength; x += 8) {
+        let y = sin((x + waveOffset * 15) * 0.04) * waveHeight * (0.8 + w * 0.1);
+        vertex(x + w * 15, y);
       }
       endShape();
 
       push();
       scale(-1, 1);
       beginShape();
-      for (let x = -waveLength; x <= waveLength; x += 5) {
-        let y = sin((x + waveOffset * 20) * 0.05) * waveHeight * (1 + w * 0.2);
-        vertex(x + w * 20, y);
+      for (let x = -waveLength; x <= waveLength; x += 8) {
+        let y = sin((x + waveOffset * 15) * 0.04) * waveHeight * (0.8 + w * 0.1);
+        vertex(x + w * 15, y);
       }
       endShape();
       pop();
@@ -813,7 +788,9 @@ function drawWaveAnimation() {
     pop();
   }
 
-  autoDrawAngle += 0.5 * animationSpeed;
+  pop();
+
+  animationAngle += 0.4 * animationSpeed;
 }
 
 function drawSpiralAnimation() {
@@ -846,7 +823,7 @@ function drawSpiralAnimation() {
     for (let j = 0; j < numPoints; j++) {
       let t = j / numPoints;
       let r = spiralRadius * t;
-      let a = t * TWO_PI * 3 + autoDrawAngle;
+      let a = t * TWO_PI * 3 + animationAngle;
       let x = cos(a) * r;
       let y = sin(a) * r;
       vertex(x, y);
@@ -860,7 +837,7 @@ function drawSpiralAnimation() {
     for (let j = 0; j < numPoints; j++) {
       let t = j / numPoints;
       let r = spiralRadius * t;
-      let a = t * TWO_PI * 3 + autoDrawAngle;
+      let a = t * TWO_PI * 3 + animationAngle;
       let x = cos(a) * r;
       let y = sin(a) * r;
       vertex(x, y);
@@ -871,7 +848,7 @@ function drawSpiralAnimation() {
     pop();
   }
 
-  autoDrawAngle += 0.02 * animationSpeed;
+  animationAngle += 0.02 * animationSpeed;
 }
 
 function drawZoomAnimation() {
@@ -898,7 +875,7 @@ function drawZoomAnimation() {
   let angle = 360 / symmetry;
   for (let i = 0; i < symmetry; i++) {
     push();
-    rotate(i * angle + autoDrawAngle);
+    rotate(i * angle + animationAngle);
     drawBranch(radius * zoomLevel, detail);
     push();
     scale(-1, 1);
@@ -913,7 +890,7 @@ function drawZoomAnimation() {
   if (zoomLevel > 2 || zoomLevel < 0.5) {
     zoomDirection *= -1;
   }
-  autoDrawAngle += 0.5 * animationSpeed;
+  animationAngle += 0.5 * animationSpeed;
 }
 
 function drawBranch(len, level) {
@@ -942,7 +919,4 @@ function drawMorphAnimation() {
   // Gradually change stroke weight
   let newStrokeWeight = map(sin(morphTimer * 1.5), -1, 1, 1, 20);
   slider.value(newStrokeWeight);
-
-  // Also draw animated content
-  drawAutoAnimation();
 }
