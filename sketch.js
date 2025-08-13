@@ -1,6 +1,7 @@
 let symmetry = 6;
 let saveButton;
 let clearButton;
+let randomizeButton;
 let slider;
 let symmetrySelect;
 let colorModeSelect;
@@ -20,6 +21,64 @@ let currentGradientIndex = 0;
 let solidColor = [255, 255, 255];
 let showInstructions = true;
 let subtitleElement;
+
+// Global function for HTML onclick - defined outside p5.js scope
+function randomizeFractal() {
+  // Clear canvas and hide instructions
+  background(0);
+  showInstructions = false;
+  
+  // Set up drawing parameters
+  let numStrokes = 60;
+  let angle = 360 / symmetry;
+  
+  push();
+  translate(width / 2, height / 2);
+  strokeWeight(slider.value());
+  
+  // Generate random fractal
+  for (let i = 0; i < numStrokes; i++) {
+    // Set color based on current color mode
+    if (currentColorMode === 'rainbow') {
+      colorMode(HSB, 255, 255);
+      let hue = map(i, 0, numStrokes, 0, 255);
+      stroke(hue, 255, 255);
+    } else if (currentColorMode === 'gradient') {
+      colorMode(RGB);
+      let t = map(i, 0, numStrokes, 0, 1);
+      let color1 = gradientColors[0];
+      let color2 = gradientColors[1];
+      let r = lerp(color1[0], color2[0], t);
+      let g = lerp(color1[1], color2[1], t);
+      let b = lerp(color1[2], color2[2], t);
+      stroke(r, g, b);
+    } else {
+      colorMode(RGB);
+      stroke(solidColor[0], solidColor[1], solidColor[2]);
+    }
+    
+    // Generate random coordinates
+    let x1 = random(-width/3, width/3);
+    let y1 = random(-height/3, height/3);
+    let x2 = random(-width/3, width/3);
+    let y2 = random(-height/3, height/3);
+    
+    // Draw symmetrical lines
+    for (let j = 0; j < symmetry; j++) {
+      push();
+      rotate(j * angle);
+      line(x1, y1, x2, y2);
+      // Mirror reflection
+      push();
+      scale(-1, 1);
+      line(x1, y1, x2, y2);
+      pop();
+      pop();
+    }
+  }
+  
+  pop();
+}
 
 function setup() {
   // Make canvas responsive with different dimensions for mobile
@@ -47,6 +106,17 @@ function setup() {
 
   clearButton = select("#clearButton");
   clearButton.mousePressed(clearCanvas);
+
+  // Use a timeout to ensure DOM is ready in all browsers
+  setTimeout(() => {
+    randomizeButton = document.getElementById("randomizeButton");
+    if (randomizeButton) {
+      randomizeButton.addEventListener('click', randomizeFractal);
+      console.log("Randomize button connected");
+    } else {
+      console.log("Randomize button not found");
+    }
+  }, 100);
 
   slider = select("#slider");
 
@@ -98,6 +168,7 @@ function clearCanvas() {
   }
   drawInstructions();
 }
+
 
 function drawInstructions() {
   if (showInstructions) {

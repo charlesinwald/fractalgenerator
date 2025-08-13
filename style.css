@@ -334,6 +334,16 @@ canvas {
   box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4) !important;
 }
 
+#randomizeButton {
+  background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%) !important;
+  box-shadow: 0 4px 15px rgba(255, 234, 167, 0.3) !important;
+}
+
+#randomizeButton:hover {
+  background: linear-gradient(135deg, #fdcb6e 0%, #ffeaa7 100%) !important;
+  box-shadow: 0 8px 25px rgba(255, 234, 167, 0.4) !important;
+}
+
 /* Responsive design */
 @media (max-width: 1024px) {
   #container {
