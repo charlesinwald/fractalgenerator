@@ -2,11 +2,13 @@ let symmetry = 6;
 let saveButton;
 let clearButton;
 let randomizeButton;
+let animateButton;
 let slider;
 let symmetrySelect;
 let colorModeSelect;
 let colorPicker;
 let colorPickerContainer;
+let animationModeSelect;
 let currentColorMode = "rainbow";
 let xoff = 0;
 let gradientColors = [
@@ -21,6 +23,14 @@ let currentGradientIndex = 0;
 let solidColor = [255, 255, 255];
 let showInstructions = true;
 let subtitleElement;
+
+// Animation variables
+let isAnimating = false;
+let animationMode = "auto_draw";
+let autoDrawAngle = 0;
+let rotationAngle = 0;
+let morphTimer = 0;
+let drawingPaths = [];
 
 // Global function for HTML onclick - defined outside p5.js scope
 function randomizeFractal() {
@@ -80,6 +90,23 @@ function randomizeFractal() {
   pop();
 }
 
+// Global function for animation toggle
+function toggleAnimation() {
+  isAnimating = !isAnimating;
+  console.log("isAnimating", isAnimating);
+  if (isAnimating) {
+    showInstructions = false;
+    if (subtitleElement) {
+      subtitleElement.style("display", "none");
+    }
+    // Clear canvas when starting animation
+    background(0);
+    animateButton.textContent = "Stop Animation";
+  } else {
+    animateButton.textContent = "Start Animation";
+  }
+}
+
 function setup() {
   // Make canvas responsive with different dimensions for mobile
   let canvasWidth, canvasHeight;
@@ -116,6 +143,15 @@ function setup() {
     } else {
       console.log("Randomize button not found");
     }
+    
+    animateButton = document.getElementById("animateButton");
+    if (animateButton) {
+      animateButton.addEventListener('click', toggleAnimation);
+      console.log("Animate button connected");
+      
+    } else {
+      console.log("Animate button not found");
+    }
   }, 100);
 
   slider = select("#slider");
@@ -129,6 +165,9 @@ function setup() {
   colorPicker = select("#colorPicker");
   colorPickerContainer = select("#colorPickerContainer");
   colorPicker.changed(updateSolidColor);
+
+  animationModeSelect = select("#animationModeSelect");
+  animationModeSelect.changed(updateAnimationMode);
 
   colorMode(HSB, 255, 255);
 
@@ -150,9 +189,12 @@ function windowResized() {
   }
   
   resizeCanvas(canvasWidth, canvasHeight);
-  background(0);
-  if (showInstructions) {
-    drawInstructions();
+  // Only clear background if not animating
+  if (!isAnimating) {
+    background(0);
+    if (showInstructions) {
+      drawInstructions();
+    }
   }
 }
 
@@ -163,6 +205,11 @@ function saveSnowflake() {
 function clearCanvas() {
   background(0);
   showInstructions = true;
+  isAnimating = false;
+  drawingPaths = [];
+  if (animateButton) {
+    animateButton.textContent = "Start Animation";
+  }
   if (subtitleElement) {
     subtitleElement.style("display", "block");
   }
@@ -205,6 +252,10 @@ function updateSolidColor() {
   solidColor = [r, g, b];
 }
 
+function updateAnimationMode() {
+  animationMode = animationModeSelect.value();
+}
+
 function getStrokeColor() {
   switch (currentColorMode) {
     case "rainbow":
@@ -243,40 +294,116 @@ function draw() {
     if (subtitleElement) {
       subtitleElement.style("display", "none");
     }
-    // Clear the background to remove the instruction text
-    background(0);
-  }
-
-  push();
-  translate(width / 2, height / 2);
-  if (mouseX > 0 && mouseX < width && mouseY > 0 && mouseY < height) {
-    let mx = mouseX - width / 2;
-    let my = mouseY - height / 2;
-    let pmx = pmouseX - width / 2;
-    let pmy = pmouseY - height / 2;
-    if (mouseIsPressed) {
-      xoff += 1;
-      //stroke weight
-      let strokeColor = getStrokeColor();
-      if (currentColorMode === "rainbow") {
-        colorMode(HSB, 255, 255);
-        stroke(strokeColor[0], strokeColor[1], strokeColor[2], strokeColor[3]);
-      } else {
-        colorMode(RGB);
-        stroke(strokeColor[0], strokeColor[1], strokeColor[2], strokeColor[3]);
-      }
-      let angle = 360 / symmetry;
-      for (let i = 0; i < symmetry; i++) {
-        rotate(angle);
-        let sw = slider.value();
-        strokeWeight(sw);
-        line(mx, my, pmx, pmy);
-        push();
-        scale(-1, 1);
-        line(mx, my, pmx, pmy);
-        pop();
-      }
+    // Only clear background if not animating
+    if (!isAnimating) {
+      background(0);
     }
   }
+
+  // Handle animation
+  if (isAnimating) {
+    drawAnimation();
+  }
+
+  // Handle manual drawing (only when not animating)
+  if (!isAnimating) {
+    push();
+    translate(width / 2, height / 2);
+    
+    if (mouseX > 0 && mouseX < width && mouseY > 0 && mouseY < height) {
+      let mx = mouseX - width / 2;
+      let my = mouseY - height / 2;
+      let pmx = pmouseX - width / 2;
+      let pmy = pmouseY - height / 2;
+      if (mouseIsPressed) {
+        xoff += 1;
+        //stroke weight
+        let strokeColor = getStrokeColor();
+        if (currentColorMode === "rainbow") {
+          colorMode(HSB, 255, 255);
+          stroke(strokeColor[0], strokeColor[1], strokeColor[2], strokeColor[3]);
+        } else {
+          colorMode(RGB);
+          stroke(strokeColor[0], strokeColor[1], strokeColor[2], strokeColor[3]);
+        }
+        let angle = 360 / symmetry;
+        for (let i = 0; i < symmetry; i++) {
+          rotate(angle);
+          let sw = slider.value();
+          strokeWeight(sw);
+          line(mx, my, pmx, pmy);
+          push();
+          scale(-1, 1);
+          line(mx, my, pmx, pmy);
+          pop();
+        }
+      }
+    }
+    pop();
+  }
+}
+
+function drawAnimation() {
+  if (animationMode === "auto_draw") {
+    drawAutoAnimation();
+  } else if (animationMode === "morph") {
+    drawMorphAnimation();
+  } else if (animationMode === "rotate") {
+    // Rotate mode needs existing content to rotate
+    // For now, just do auto draw with rotation
+    drawAutoAnimation();
+  }
+}
+
+function drawAutoAnimation() {
+  push();
+  translate(width / 2, height / 2);
+  
+  // Create automatic drawing motion
+  let radius = min(width, height) * 0.3;
+  let x1 = cos(autoDrawAngle) * radius * 0.5;
+  let y1 = sin(autoDrawAngle) * radius * 0.5;
+  let x2 = cos(autoDrawAngle + PI) * radius * 0.8;
+  let y2 = sin(autoDrawAngle + PI) * radius * 0.8;
+  
+  autoDrawAngle += 0.02;
+  xoff += 1;
+  
+  let strokeColor = getStrokeColor();
+  if (currentColorMode === "rainbow") {
+    colorMode(HSB, 255, 255);
+    stroke(strokeColor[0], strokeColor[1], strokeColor[2], 255);
+  } else {
+    colorMode(RGB);
+    stroke(strokeColor[0], strokeColor[1], strokeColor[2], 255);
+  }
+  
+  let angle = 360 / symmetry;
+  strokeWeight(slider.value());
+  
+  for (let i = 0; i < symmetry; i++) {
+    rotate(angle);
+    line(x1, y1, x2, y2);
+    push();
+    scale(-1, 1);
+    line(x1, y1, x2, y2);
+    pop();
+  }
+  
   pop();
+}
+
+function drawMorphAnimation() {
+  morphTimer += 0.01;
+  
+  // Gradually change symmetry
+  let newSymmetry = floor(map(sin(morphTimer), -1, 1, 2, 8));
+  if (newSymmetry !== symmetry) {
+    symmetry = newSymmetry;
+    symmetrySelect.value(symmetry.toString());
+  }
+  
+  // Gradually change stroke weight
+  let newStrokeWeight = map(sin(morphTimer * 1.5), -1, 1, 1, 20);
+  slider.value(newStrokeWeight);
 }

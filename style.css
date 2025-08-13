@@ -344,6 +344,16 @@ canvas {
   box-shadow: 0 8px 25px rgba(255, 234, 167, 0.4) !important;
 }
 
+#animateButton {
+  background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%) !important;
+  box-shadow: 0 4px 15px rgba(162, 155, 254, 0.3) !important;
+}
+
+#animateButton:hover {
+  background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%) !important;
+  box-shadow: 0 8px 25px rgba(162, 155, 254, 0.4) !important;
+}
+
 /* Responsive design */
 @media (max-width: 1024px) {
   #container {
