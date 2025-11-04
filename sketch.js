@@ -171,9 +171,11 @@ function toggleAnimation() {
     // Clear canvas when starting animation
     background(0);
     animateButton.querySelector('i').className = "fas fa-stop";
+    animateButton.querySelector('span').textContent = "Stop";
     animateButton.title = "Stop Animation";
   } else {
     animateButton.querySelector('i').className = "fas fa-play";
+    animateButton.querySelector('span').textContent = "Animate";
     animateButton.title = "Start Animation";
   }
 }
@@ -339,6 +341,7 @@ function clearCanvas() {
   animationAngle = 0;
   if (animateButton) {
     animateButton.querySelector('i').className = "fas fa-play";
+    animateButton.querySelector('span').textContent = "Animate";
     animateButton.title = "Start Animation";
   }
   if (subtitleElement) {
