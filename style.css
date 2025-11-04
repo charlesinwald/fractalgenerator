@@ -505,7 +505,7 @@ canvas {
     max-width: 600px;
     padding: 15px;
     height: auto;
-    overflow-y: visible;
+    overflow-y: scroll;
   }
 
   .button-row {
