@@ -51,6 +51,17 @@ let trailsEnabled = false;
 let trailsCheckbox;
 let frameBuffer = null;
 
+// Flower animation variables
+let flowerBloom = 0.3;
+let flowerBloomDirection = 1;
+let petalRotation = 0;
+let flowerLayers = 3;
+let flowers = [];
+let flowerParticles = [];
+let flowerType = "rose"; // rose, lily, lotus, cherry, dahlia
+let flowerCount = 3;
+let swayOffset = 0;
+
 // Particle class for particle system
 class Particle {
   constructor(x, y, angle) {
@@ -93,6 +104,611 @@ class Particle {
       pop();
       pop();
     }
+    pop();
+  }
+
+  isDead() {
+    return this.lifespan < 0;
+  }
+}
+
+// Flower class for multiple flower instances
+class Flower {
+  constructor(x, y, size, phaseOffset) {
+    this.x = x;
+    this.y = y;
+    this.size = size;
+    this.bloom = 0.3;
+    this.bloomDirection = 1;
+    this.rotation = random(360);
+    this.rotationSpeed = random(0.2, 0.4);
+    this.phaseOffset = phaseOffset;
+    this.swayAmount = random(5, 15);
+    this.swaySpeed = random(0.8, 1.2);
+    this.depth = random(0.7, 1.0); // for depth of field
+  }
+
+  update() {
+    this.bloom += this.bloomDirection * 0.003 * animationSpeed;
+    if (this.bloom > 1.0 || this.bloom < 0.3) {
+      this.bloomDirection *= -1;
+    }
+    this.rotation += this.rotationSpeed * animationSpeed;
+  }
+
+  display(type) {
+    push();
+    translate(this.x, this.y);
+
+    // Apply sway effect
+    let sway = sin(swayOffset * this.swaySpeed + this.phaseOffset) * this.swayAmount;
+    translate(sway, 0);
+
+    // Apply depth blur effect (smaller = further)
+    let alpha = map(this.depth, 0.7, 1.0, 200, 255);
+
+    scale(this.size);
+
+    // Add subtle glow behind flower
+    push();
+    xoff += 0.1;
+    let strokeColor = getStrokeColor();
+    if (currentColorMode === "rainbow") {
+      colorMode(HSB, 255, 255);
+      fill(strokeColor[0], 100, 255, 30);
+    } else {
+      colorMode(RGB);
+      fill(strokeColor[0], strokeColor[1], strokeColor[2], 30);
+    }
+    noStroke();
+    ellipse(0, -40, 180, 180);
+    pop();
+
+    // Draw stem
+    this.drawStem(alpha);
+
+    // Draw flower based on type
+    switch(type) {
+      case "rose":
+        this.drawRose(alpha);
+        break;
+      case "lily":
+        this.drawLily(alpha);
+        break;
+      case "lotus":
+        this.drawLotus(alpha);
+        break;
+      case "cherry":
+        this.drawCherry(alpha);
+        break;
+      case "dahlia":
+        this.drawDahlia(alpha);
+        break;
+      default:
+        this.drawRose(alpha);
+    }
+
+    pop();
+  }
+
+  drawStem(alpha) {
+    push();
+    let stemColor = [100, 180, 100];
+    colorMode(RGB);
+    stroke(stemColor[0], stemColor[1], stemColor[2], alpha * 0.8);
+    strokeWeight(3);
+    noFill();
+
+    // Curved stem
+    beginShape();
+    for (let i = 0; i <= 10; i++) {
+      let t = i / 10;
+      let x = sin(t * PI) * 8;
+      let y = t * 80;
+      vertex(x, y);
+    }
+    endShape();
+
+    // Leaves
+    fill(stemColor[0], stemColor[1], stemColor[2], alpha * 0.6);
+    stroke(stemColor[0], stemColor[1], stemColor[2], alpha * 0.8);
+    strokeWeight(1);
+
+    push();
+    translate(-5, 40);
+    rotate(-30);
+    ellipse(0, 0, 20, 35);
+    pop();
+
+    push();
+    translate(5, 55);
+    rotate(30);
+    ellipse(0, 0, 18, 30);
+    pop();
+
+    pop();
+  }
+
+  drawRose(alpha) {
+    push();
+    rotate(this.rotation);
+
+    xoff += 0.3;
+    let strokeColor = getStrokeColor();
+
+    // Draw center spiral (rose bud)
+    push();
+    if (currentColorMode === "rainbow") {
+      colorMode(HSB, 255, 255);
+      fill(strokeColor[0], 150, 200, alpha * 0.9);
+      stroke(strokeColor[0], 200, 255, alpha);
+    } else {
+      colorMode(RGB);
+      fill(strokeColor[0], strokeColor[1], strokeColor[2], alpha * 0.9);
+      stroke(strokeColor[0], strokeColor[1], strokeColor[2], alpha);
+    }
+    strokeWeight(1);
+
+    // Tight center petals
+    for (let i = 0; i < 3; i++) {
+      push();
+      rotate(i * 120 + this.rotation * 0.5);
+      arc(0, 0, 15 * this.bloom, 20 * this.bloom, 0, 180);
+      pop();
+    }
+    pop();
+
+    // Outer rose petals (4 layers)
+    for (let layer = 0; layer < 4; layer++) {
+      this.drawRosePetalLayer(layer, alpha, strokeColor);
+    }
+    pop();
+  }
+
+  drawRosePetalLayer(layer, alpha, strokeColor) {
+    push();
+    rotate(this.rotation * 0.2 + layer * 15);
+
+    let layerSize = 1 - (layer * 0.1);
+    let layerRadius = (30 + layer * 20) * this.bloom * layerSize;
+    let petalLength = (40 + layer * 15) * this.bloom * layerSize;
+    let petalWidth = (25 + layer * 10) * this.bloom * layerSize;
+    let numPetals = 5;
+
+    for (let i = 0; i < numPetals; i++) {
+      push();
+      rotate(i * (360 / numPetals));
+
+      // Gradient effect on petals
+      if (currentColorMode === "rainbow") {
+        colorMode(HSB, 255, 255);
+        let h = strokeColor[0];
+        // Outer part of petal (lighter)
+        fill(h, 120 - layer * 20, 255, alpha * 0.8 - layer * 15);
+        stroke(h, 200, 255, alpha * 0.9 - layer * 20);
+      } else {
+        colorMode(RGB);
+        let r = min(255, strokeColor[0] + 40 - layer * 10);
+        let g = min(255, strokeColor[1] + 40 - layer * 10);
+        let b = min(255, strokeColor[2] + 40 - layer * 10);
+        fill(r, g, b, alpha * 0.8 - layer * 15);
+        stroke(strokeColor[0], strokeColor[1], strokeColor[2], alpha * 0.9 - layer * 20);
+      }
+      strokeWeight(1.5);
+
+      // Heart-shaped rose petal
+      beginShape();
+      vertex(0, -layerRadius);
+      bezierVertex(
+        petalWidth * 0.6, -layerRadius - petalLength * 0.2,
+        petalWidth * 0.8, -layerRadius - petalLength * 0.6,
+        petalWidth * 0.4, -layerRadius - petalLength
+      );
+      bezierVertex(
+        petalWidth * 0.2, -layerRadius - petalLength * 1.1,
+        -petalWidth * 0.2, -layerRadius - petalLength * 1.1,
+        -petalWidth * 0.4, -layerRadius - petalLength
+      );
+      bezierVertex(
+        -petalWidth * 0.8, -layerRadius - petalLength * 0.6,
+        -petalWidth * 0.6, -layerRadius - petalLength * 0.2,
+        0, -layerRadius
+      );
+      endShape(CLOSE);
+
+      // Inner gradient for depth
+      if (currentColorMode === "rainbow") {
+        fill(strokeColor[0], 180, 200, alpha * 0.4);
+      } else {
+        fill(strokeColor[0] * 0.8, strokeColor[1] * 0.8, strokeColor[2] * 0.8, alpha * 0.4);
+      }
+      noStroke();
+      beginShape();
+      vertex(0, -layerRadius);
+      bezierVertex(
+        petalWidth * 0.3, -layerRadius - petalLength * 0.3,
+        petalWidth * 0.2, -layerRadius - petalLength * 0.6,
+        0, -layerRadius - petalLength * 0.5
+      );
+      bezierVertex(
+        -petalWidth * 0.2, -layerRadius - petalLength * 0.6,
+        -petalWidth * 0.3, -layerRadius - petalLength * 0.3,
+        0, -layerRadius
+      );
+      endShape(CLOSE);
+
+      pop();
+    }
+    pop();
+  }
+
+  drawLily(alpha) {
+    push();
+    rotate(this.rotation);
+
+    xoff += 0.3;
+    let strokeColor = getStrokeColor();
+
+    // Lily center with stamens
+    push();
+    if (currentColorMode === "rainbow") {
+      colorMode(HSB, 255, 255);
+      fill(strokeColor[0], 255, 200, alpha);
+      stroke(strokeColor[0], 200, 255, alpha);
+    } else {
+      colorMode(RGB);
+      fill(255, 220, 100, alpha);
+      stroke(200, 180, 50, alpha);
+    }
+    strokeWeight(2);
+
+    // Long stamens
+    for (let i = 0; i < 6; i++) {
+      push();
+      rotate(i * 60);
+      line(0, 0, 0, -30 * this.bloom);
+      fill(180, 100, 50, alpha);
+      noStroke();
+      ellipse(0, -30 * this.bloom, 6, 6);
+      pop();
+    }
+
+    // Center
+    fill(150, 200, 100, alpha);
+    noStroke();
+    circle(0, 0, 12);
+    pop();
+
+    // 6 elongated lily petals
+    let numPetals = 6;
+    for (let i = 0; i < numPetals; i++) {
+      push();
+      rotate(i * (360 / numPetals) + this.rotation * 0.3);
+
+      if (currentColorMode === "rainbow") {
+        colorMode(HSB, 255, 255);
+        fill(strokeColor[0], 100, 255, alpha * 0.9);
+        stroke(strokeColor[0], 180, 255, alpha);
+      } else {
+        colorMode(RGB);
+        fill(strokeColor[0] + 50, strokeColor[1] + 50, strokeColor[2] + 50, alpha * 0.9);
+        stroke(strokeColor[0], strokeColor[1], strokeColor[2], alpha);
+      }
+      strokeWeight(2);
+
+      // Long, elegant lily petal
+      beginShape();
+      vertex(0, -20);
+      bezierVertex(
+        15, -30,
+        20, -70 * this.bloom,
+        8, -100 * this.bloom
+      );
+      bezierVertex(
+        5, -105 * this.bloom,
+        -5, -105 * this.bloom,
+        -8, -100 * this.bloom
+      );
+      bezierVertex(
+        -20, -70 * this.bloom,
+        -15, -30,
+        0, -20
+      );
+      endShape(CLOSE);
+
+      // Spotted pattern
+      if (currentColorMode === "rainbow") {
+        fill(strokeColor[0], 200, 150, alpha * 0.6);
+      } else {
+        fill(strokeColor[0] * 0.7, strokeColor[1] * 0.5, strokeColor[2] * 0.5, alpha * 0.6);
+      }
+      noStroke();
+      for (let j = 0; j < 5; j++) {
+        ellipse(random(-5, 5), -30 - j * 10, 3, 4);
+      }
+
+      pop();
+    }
+    pop();
+  }
+
+  drawLotus(alpha) {
+    push();
+    rotate(this.rotation);
+
+    xoff += 0.3;
+    let strokeColor = getStrokeColor();
+
+    // Lotus center (seed pod)
+    push();
+    if (currentColorMode === "rainbow") {
+      colorMode(HSB, 255, 255);
+      fill(strokeColor[0], 100, 180, alpha);
+      stroke(strokeColor[0], 150, 200, alpha);
+    } else {
+      colorMode(RGB);
+      fill(200, 180, 100, alpha);
+      stroke(180, 160, 80, alpha);
+    }
+    strokeWeight(2);
+
+    // Detailed seed pod
+    ellipse(0, 0, 35 * this.bloom, 30 * this.bloom);
+
+    // Seeds
+    fill(150, 130, 70, alpha);
+    noStroke();
+    let seedPositions = [
+      {x: 0, y: 0},
+      {x: -8, y: -5},
+      {x: 8, y: -5},
+      {x: -8, y: 5},
+      {x: 8, y: 5},
+      {x: 0, y: -8},
+      {x: 0, y: 8}
+    ];
+    for (let pos of seedPositions) {
+      circle(pos.x * this.bloom, pos.y * this.bloom, 4);
+    }
+    pop();
+
+    // Multiple layers of lotus petals (3 layers)
+    for (let layer = 2; layer >= 0; layer--) {
+      push();
+      rotate(layer * 20 + this.rotation * 0.15);
+
+      let layerPetals = 8;
+      let layerRadius = (20 + layer * 25) * this.bloom;
+      let petalLength = (60 + layer * 10) * this.bloom;
+      let petalWidth = 35 * this.bloom;
+
+      for (let i = 0; i < layerPetals; i++) {
+        push();
+        rotate(i * (360 / layerPetals));
+
+        if (currentColorMode === "rainbow") {
+          colorMode(HSB, 255, 255);
+          let h = (strokeColor[0] + layer * 10) % 255;
+          fill(h, 80 + layer * 20, 255, alpha * 0.85 - layer * 10);
+          stroke(h, 150, 255, alpha * 0.9);
+        } else {
+          colorMode(RGB);
+          fill(strokeColor[0] + layer * 20, strokeColor[1] + layer * 20, strokeColor[2] + layer * 20, alpha * 0.85 - layer * 10);
+          stroke(strokeColor[0], strokeColor[1], strokeColor[2], alpha * 0.9);
+        }
+        strokeWeight(2);
+
+        // Rounded lotus petal
+        beginShape();
+        vertex(0, -layerRadius);
+        bezierVertex(
+          petalWidth * 0.5, -layerRadius - petalLength * 0.3,
+          petalWidth * 0.6, -layerRadius - petalLength * 0.7,
+          petalWidth * 0.2, -layerRadius - petalLength
+        );
+        bezierVertex(
+          petalWidth * 0.1, -layerRadius - petalLength * 1.05,
+          -petalWidth * 0.1, -layerRadius - petalLength * 1.05,
+          -petalWidth * 0.2, -layerRadius - petalLength
+        );
+        bezierVertex(
+          -petalWidth * 0.6, -layerRadius - petalLength * 0.7,
+          -petalWidth * 0.5, -layerRadius - petalLength * 0.3,
+          0, -layerRadius
+        );
+        endShape(CLOSE);
+
+        pop();
+      }
+      pop();
+    }
+    pop();
+  }
+
+  drawCherry(alpha) {
+    push();
+    rotate(this.rotation);
+
+    xoff += 0.3;
+    let strokeColor = getStrokeColor();
+
+    // Cherry blossom center
+    push();
+    if (currentColorMode === "rainbow") {
+      colorMode(HSB, 255, 255);
+      fill(strokeColor[0], 100, 255, alpha);
+    } else {
+      colorMode(RGB);
+      fill(255, 230, 100, alpha);
+    }
+    noStroke();
+    circle(0, 0, 12 * this.bloom);
+
+    // Stamens
+    if (currentColorMode === "rainbow") {
+      stroke(strokeColor[0], 150, 200, alpha);
+    } else {
+      stroke(200, 180, 100, alpha);
+    }
+    strokeWeight(1.5);
+    for (let i = 0; i < 8; i++) {
+      push();
+      rotate(i * 45);
+      line(0, 0, 0, -8 * this.bloom);
+      pop();
+    }
+    pop();
+
+    // 5 simple cherry blossom petals
+    let numPetals = 5;
+    for (let i = 0; i < numPetals; i++) {
+      push();
+      rotate(i * (360 / numPetals) + this.rotation * 0.4);
+
+      if (currentColorMode === "rainbow") {
+        colorMode(HSB, 255, 255);
+        fill(strokeColor[0], 50, 255, alpha * 0.85);
+        stroke(strokeColor[0], 100, 255, alpha);
+      } else {
+        colorMode(RGB);
+        fill(strokeColor[0] + 80, strokeColor[1] + 80, strokeColor[2] + 80, alpha * 0.85);
+        stroke(strokeColor[0], strokeColor[1], strokeColor[2], alpha);
+      }
+      strokeWeight(1.5);
+
+      // Simple notched petal
+      beginShape();
+      vertex(0, -15);
+      bezierVertex(
+        20, -25,
+        25, -50 * this.bloom,
+        15, -60 * this.bloom
+      );
+      // Notch at tip
+      vertex(8, -58 * this.bloom);
+      vertex(0, -65 * this.bloom);
+      vertex(-8, -58 * this.bloom);
+
+      vertex(-15, -60 * this.bloom);
+      bezierVertex(
+        -25, -50 * this.bloom,
+        -20, -25,
+        0, -15
+      );
+      endShape(CLOSE);
+
+      pop();
+    }
+    pop();
+  }
+
+  drawDahlia(alpha) {
+    push();
+    rotate(this.rotation);
+
+    xoff += 0.3;
+    let strokeColor = getStrokeColor();
+
+    // Many layers of pointed petals
+    for (let layer = 0; layer < 5; layer++) {
+      push();
+      rotate(layer * 10 + this.rotation * 0.2);
+
+      let layerPetals = 8 + layer * 2;
+      let layerRadius = (15 + layer * 15) * this.bloom;
+      let petalLength = (50 - layer * 5) * this.bloom;
+      let petalWidth = 12 * this.bloom;
+
+      for (let i = 0; i < layerPetals; i++) {
+        push();
+        rotate(i * (360 / layerPetals));
+
+        if (currentColorMode === "rainbow") {
+          colorMode(HSB, 255, 255);
+          let h = (strokeColor[0] + layer * 15) % 255;
+          fill(h, 200 - layer * 20, 255, alpha * 0.9 - layer * 10);
+          stroke(h, 255, 255, alpha * 0.95);
+        } else {
+          colorMode(RGB);
+          fill(strokeColor[0], strokeColor[1], strokeColor[2], alpha * 0.9 - layer * 10);
+          stroke(strokeColor[0], strokeColor[1], strokeColor[2], alpha * 0.95);
+        }
+        strokeWeight(1);
+
+        // Pointed dahlia petal
+        beginShape();
+        vertex(0, -layerRadius);
+        vertex(petalWidth * 0.4, -layerRadius - petalLength * 0.5);
+        vertex(0, -layerRadius - petalLength);
+        vertex(-petalWidth * 0.4, -layerRadius - petalLength * 0.5);
+        endShape(CLOSE);
+
+        pop();
+      }
+      pop();
+    }
+
+    // Dahlia center
+    push();
+    if (currentColorMode === "rainbow") {
+      colorMode(HSB, 255, 255);
+      fill(strokeColor[0], 255, 200, alpha);
+    } else {
+      colorMode(RGB);
+      fill(strokeColor[0] * 0.8, strokeColor[1] * 0.6, strokeColor[2] * 0.4, alpha);
+    }
+    noStroke();
+    circle(0, 0, 20 * this.bloom);
+    pop();
+
+    pop();
+  }
+}
+
+// Flower particle class (pollen, sparkles, perfume mist)
+class FlowerParticle {
+  constructor(x, y) {
+    this.x = x + random(-20, 20);
+    this.y = y;
+    this.vx = random(-0.5, 0.5);
+    this.vy = random(-1, -0.3);
+    this.size = random(2, 6);
+    this.lifespan = 255;
+    this.twinkle = random(TWO_PI);
+    this.color = getStrokeColor();
+  }
+
+  update() {
+    this.x += this.vx * animationSpeed;
+    this.y += this.vy * animationSpeed;
+    this.lifespan -= 1.5 * animationSpeed;
+    this.twinkle += 0.1;
+  }
+
+  display() {
+    push();
+    let alpha = this.lifespan * (0.5 + sin(this.twinkle) * 0.5);
+
+    if (currentColorMode === "rainbow") {
+      colorMode(HSB, 255, 255);
+      fill(this.color[0], 200, 255, alpha);
+      stroke(this.color[0], 255, 255, alpha * 0.5);
+    } else {
+      colorMode(RGB);
+      fill(this.color[0], this.color[1], this.color[2], alpha);
+      stroke(this.color[0] + 50, this.color[1] + 50, this.color[2] + 50, alpha * 0.5);
+    }
+
+    strokeWeight(0.5);
+
+    // Draw sparkle
+    ellipse(this.x, this.y, this.size, this.size);
+
+    // Glow effect
+    noStroke();
+    fill(this.color[0], this.color[1], this.color[2], alpha * 0.2);
+    ellipse(this.x, this.y, this.size * 3, this.size * 3);
+
     pop();
   }
 
@@ -272,6 +888,31 @@ function setup() {
         }
       });
     }
+
+    // Flower controls
+    let flowerTypeSelect = document.getElementById("flowerTypeSelect");
+    if (flowerTypeSelect) {
+      flowerTypeSelect.addEventListener("change", function () {
+        flowerType = this.value;
+        flowers = [];
+        flowerParticles = [];
+        if (!trailsEnabled) {
+          background(0);
+        }
+      });
+    }
+
+    let flowerCountSelect = document.getElementById("flowerCountSelect");
+    if (flowerCountSelect) {
+      flowerCountSelect.addEventListener("change", function () {
+        flowerCount = parseInt(this.value);
+        flowers = [];
+        flowerParticles = [];
+        if (!trailsEnabled) {
+          background(0);
+        }
+      });
+    }
   }, 100);
 
   slider = select("#slider");
@@ -339,6 +980,12 @@ function clearCanvas() {
   zoomLevel = 1.0;
   kaleidoscopeAngle = 0;
   animationAngle = 0;
+  flowerBloom = 0.3;
+  flowerBloomDirection = 1;
+  petalRotation = 0;
+  flowers = [];
+  flowerParticles = [];
+  swayOffset = 0;
   if (animateButton) {
     animateButton.querySelector('i').className = "fas fa-play";
     animateButton.querySelector('span').textContent = "Animate";
@@ -397,6 +1044,30 @@ function updateAnimationMode() {
   zoomLevel = 1.0;
   kaleidoscopeAngle = 0;
   animationAngle = 0;
+  flowerBloom = 0.3;
+  flowerBloomDirection = 1;
+  petalRotation = 0;
+  flowers = [];
+  flowerParticles = [];
+  swayOffset = 0;
+
+  // Show/hide flower controls
+  let flowerTypeSelect = document.getElementById("flowerTypeSelect");
+  let flowerCountSelect = document.getElementById("flowerCountSelect");
+  if (flowerTypeSelect && flowerCountSelect) {
+    if (animationMode === "flower") {
+      flowerTypeSelect.style.display = "inline";
+      flowerCountSelect.style.display = "inline";
+      document.querySelector('label[for="flowerTypeSelect"]').style.display = "inline";
+      document.querySelector('label[for="flowerCountSelect"]').style.display = "inline";
+    } else {
+      flowerTypeSelect.style.display = "none";
+      flowerCountSelect.style.display = "none";
+      document.querySelector('label[for="flowerTypeSelect"]').style.display = "none";
+      document.querySelector('label[for="flowerCountSelect"]').style.display = "none";
+    }
+  }
+
   if (!trailsEnabled) {
     background(0);
   }
@@ -547,6 +1218,9 @@ function drawAnimation() {
       break;
     case "morph":
       drawMorphAnimation();
+      break;
+    case "flower":
+      drawFlowerAnimation();
       break;
   }
 
@@ -922,4 +1596,92 @@ function drawMorphAnimation() {
   // Gradually change stroke weight
   let newStrokeWeight = map(sin(morphTimer * 1.5), -1, 1, 1, 20);
   slider.value(newStrokeWeight);
+}
+
+function initFlowers() {
+  flowers = [];
+  let positions = [];
+
+  // Calculate positions based on flower count
+  if (flowerCount === 1) {
+    positions = [{x: 0, y: height * 0.1}];
+  } else if (flowerCount === 2) {
+    positions = [
+      {x: -width * 0.15, y: height * 0.15},
+      {x: width * 0.15, y: height * 0.15}
+    ];
+  } else if (flowerCount === 3) {
+    positions = [
+      {x: -width * 0.2, y: height * 0.15},
+      {x: 0, y: 0},
+      {x: width * 0.2, y: height * 0.2}
+    ];
+  } else if (flowerCount === 5) {
+    positions = [
+      {x: -width * 0.25, y: height * 0.1},
+      {x: -width * 0.12, y: height * 0.2},
+      {x: 0, y: 0},
+      {x: width * 0.12, y: height * 0.2},
+      {x: width * 0.25, y: height * 0.1}
+    ];
+  }
+
+  for (let i = 0; i < positions.length; i++) {
+    let size = random(0.8, 1.2);
+    flowers.push(new Flower(positions[i].x, positions[i].y, size, i * PI / 3));
+  }
+}
+
+function drawFlowerAnimation() {
+  // Gentle background fade for trails effect
+  if (!trailsEnabled) {
+    push();
+    fill(0, 0, 0, 25);
+    noStroke();
+    rect(-width/2, -height/2, width, height);
+    pop();
+  } else {
+    // Even with trails, need some fade
+    push();
+    fill(0, 0, 0, 10);
+    noStroke();
+    rect(-width/2, -height/2, width, height);
+    pop();
+  }
+
+  // Initialize flowers if needed
+  if (flowers.length === 0) {
+    initFlowers();
+  }
+
+  // Update sway offset
+  swayOffset += 0.02 * animationSpeed;
+
+  // Update and display all flowers (sorted by depth for proper layering)
+  flowers.sort((a, b) => a.depth - b.depth);
+
+  for (let flower of flowers) {
+    flower.update();
+    flower.display(flowerType);
+  }
+
+  // Generate flower particles (pollen/sparkles)
+  if (frameCount % max(1, floor(10 / animationSpeed)) === 0) {
+    for (let flower of flowers) {
+      if (random() < 0.5) {
+        flowerParticles.push(new FlowerParticle(flower.x, flower.y - 80 * flower.size));
+      }
+    }
+  }
+
+  // Update and display flower particles
+  for (let i = flowerParticles.length - 1; i >= 0; i--) {
+    let p = flowerParticles[i];
+    p.update();
+    p.display();
+
+    if (p.isDead()) {
+      flowerParticles.splice(i, 1);
+    }
+  }
 }
