@@ -62,6 +62,11 @@ let flowerType = "rose"; // rose, lily, lotus, cherry, dahlia
 let flowerCount = 3;
 let swayOffset = 0;
 
+// Filter variables
+let filterSelect;
+let currentFilter = "none";
+let filterBuffer = null;
+
 // Particle class for particle system
 class Particle {
   constructor(x, y, angle) {
@@ -930,6 +935,9 @@ function setup() {
   animationModeSelect = select("#animationModeSelect");
   animationModeSelect.changed(updateAnimationMode);
 
+  filterSelect = select("#filterSelect");
+  filterSelect.changed(updateFilter);
+
   colorMode(HSB, 255, 255);
 
   // Draw initial instructions
@@ -1073,6 +1081,10 @@ function updateAnimationMode() {
   }
 }
 
+function updateFilter() {
+  currentFilter = filterSelect.value();
+}
+
 function getStrokeColor() {
   switch (currentColorMode) {
     case "rainbow":
@@ -1182,6 +1194,321 @@ function draw() {
     }
   }
   pop();
+
+  // Apply photographic filter
+  if (currentFilter !== "none") {
+    applyFilter(currentFilter);
+  }
+}
+
+function applyFilter(filterType) {
+  switch(filterType) {
+    case "grayscale":
+      filter(GRAY);
+      break;
+    case "sepia":
+      applySepiaFilter();
+      break;
+    case "vintage":
+      applyVintageFilter();
+      break;
+    case "blackwhite":
+      applyBlackWhiteFilter();
+      break;
+    case "highcontrast":
+      applyHighContrastFilter();
+      break;
+    case "invert":
+      filter(INVERT);
+      break;
+    case "blur":
+      filter(BLUR, 1);
+      break;
+    case "sharpen":
+      applySharpenFilter();
+      break;
+    case "saturate":
+      applySaturateFilter();
+      break;
+    case "desaturate":
+      applyDesaturateFilter();
+      break;
+    case "brighten":
+      applyBrightenFilter();
+      break;
+    case "darken":
+      applyDarkenFilter();
+      break;
+    case "posterize":
+      filter(POSTERIZE, 4);
+      break;
+    case "threshold":
+      filter(THRESHOLD);
+      break;
+  }
+}
+
+function applySepiaFilter() {
+  loadPixels();
+  for (let i = 0; i < pixels.length; i += 4) {
+    let r = pixels[i];
+    let g = pixels[i + 1];
+    let b = pixels[i + 2];
+    
+    let tr = 0.393 * r + 0.769 * g + 0.189 * b;
+    let tg = 0.349 * r + 0.686 * g + 0.168 * b;
+    let tb = 0.272 * r + 0.534 * g + 0.131 * b;
+    
+    pixels[i] = constrain(tr, 0, 255);
+    pixels[i + 1] = constrain(tg, 0, 255);
+    pixels[i + 2] = constrain(tb, 0, 255);
+  }
+  updatePixels();
+}
+
+function applyVintageFilter() {
+  loadPixels();
+  for (let i = 0; i < pixels.length; i += 4) {
+    let r = pixels[i];
+    let g = pixels[i + 1];
+    let b = pixels[i + 2];
+    
+    // Vintage warm tone
+    let tr = r * 1.1 + 20;
+    let tg = g * 0.95 + 10;
+    let tb = b * 0.9;
+    
+    // Add slight vignette effect (darker at edges)
+    let x = (i / 4) % width;
+    let y = floor((i / 4) / width);
+    let distFromCenter = dist(x, y, width / 2, height / 2);
+    let maxDist = dist(0, 0, width / 2, height / 2);
+    let vignette = 1 - (distFromCenter / maxDist) * 0.3;
+    
+    pixels[i] = constrain(tr * vignette, 0, 255);
+    pixels[i + 1] = constrain(tg * vignette, 0, 255);
+    pixels[i + 2] = constrain(tb * vignette, 0, 255);
+  }
+  updatePixels();
+}
+
+function applyBlackWhiteFilter() {
+  loadPixels();
+  for (let i = 0; i < pixels.length; i += 4) {
+    let r = pixels[i];
+    let g = pixels[i + 1];
+    let b = pixels[i + 2];
+    
+    // Convert to grayscale with high contrast
+    let gray = (r + g + b) / 3;
+    gray = gray > 127 ? 255 : 0; // Hard threshold
+    
+    pixels[i] = gray;
+    pixels[i + 1] = gray;
+    pixels[i + 2] = gray;
+  }
+  updatePixels();
+}
+
+function applyHighContrastFilter() {
+  loadPixels();
+  for (let i = 0; i < pixels.length; i += 4) {
+    let r = pixels[i];
+    let g = pixels[i + 1];
+    let b = pixels[i + 2];
+    
+    // Increase contrast
+    let factor = 1.5;
+    r = constrain((r - 128) * factor + 128, 0, 255);
+    g = constrain((g - 128) * factor + 128, 0, 255);
+    b = constrain((b - 128) * factor + 128, 0, 255);
+    
+    pixels[i] = r;
+    pixels[i + 1] = g;
+    pixels[i + 2] = b;
+  }
+  updatePixels();
+}
+
+function applySharpenFilter() {
+  // Create a temporary buffer for the sharpened image
+  let tempPixels = [];
+  loadPixels();
+  
+  // Copy pixels
+  for (let i = 0; i < pixels.length; i++) {
+    tempPixels[i] = pixels[i];
+  }
+  
+  // Sharpen kernel
+  let kernel = [
+    0, -1, 0,
+    -1, 5, -1,
+    0, -1, 0
+  ];
+  
+  for (let y = 1; y < height - 1; y++) {
+    for (let x = 1; x < width - 1; x++) {
+      let r = 0, g = 0, b = 0;
+      let idx = 0;
+      
+      for (let ky = -1; ky <= 1; ky++) {
+        for (let kx = -1; kx <= 1; kx++) {
+          let px = (y + ky) * width + (x + kx);
+          let pidx = px * 4;
+          let weight = kernel[idx];
+          
+          r += tempPixels[pidx] * weight;
+          g += tempPixels[pidx + 1] * weight;
+          b += tempPixels[pidx + 2] * weight;
+          
+          idx++;
+        }
+      }
+      
+      let pidx = (y * width + x) * 4;
+      pixels[pidx] = constrain(r, 0, 255);
+      pixels[pidx + 1] = constrain(g, 0, 255);
+      pixels[pidx + 2] = constrain(b, 0, 255);
+    }
+  }
+  
+  updatePixels();
+}
+
+function applySaturateFilter() {
+  loadPixels();
+  colorMode(HSB, 255);
+  
+  for (let i = 0; i < pixels.length; i += 4) {
+    let r = pixels[i];
+    let g = pixels[i + 1];
+    let b = pixels[i + 2];
+    
+    // Convert RGB to HSB
+    let hsb = rgbToHsb(r, g, b);
+    
+    // Increase saturation
+    hsb[1] = constrain(hsb[1] * 1.5, 0, 255);
+    
+    // Convert back to RGB
+    let rgb = hsbToRgb(hsb[0], hsb[1], hsb[2]);
+    
+    pixels[i] = rgb[0];
+    pixels[i + 1] = rgb[1];
+    pixels[i + 2] = rgb[2];
+  }
+  
+  colorMode(RGB);
+  updatePixels();
+}
+
+function applyDesaturateFilter() {
+  loadPixels();
+  colorMode(HSB, 255);
+  
+  for (let i = 0; i < pixels.length; i += 4) {
+    let r = pixels[i];
+    let g = pixels[i + 1];
+    let b = pixels[i + 2];
+    
+    // Convert RGB to HSB
+    let hsb = rgbToHsb(r, g, b);
+    
+    // Decrease saturation
+    hsb[1] = constrain(hsb[1] * 0.5, 0, 255);
+    
+    // Convert back to RGB
+    let rgb = hsbToRgb(hsb[0], hsb[1], hsb[2]);
+    
+    pixels[i] = rgb[0];
+    pixels[i + 1] = rgb[1];
+    pixels[i + 2] = rgb[2];
+  }
+  
+  colorMode(RGB);
+  updatePixels();
+}
+
+function applyBrightenFilter() {
+  loadPixels();
+  for (let i = 0; i < pixels.length; i += 4) {
+    pixels[i] = constrain(pixels[i] * 1.3, 0, 255);
+    pixels[i + 1] = constrain(pixels[i + 1] * 1.3, 0, 255);
+    pixels[i + 2] = constrain(pixels[i + 2] * 1.3, 0, 255);
+  }
+  updatePixels();
+}
+
+function applyDarkenFilter() {
+  loadPixels();
+  for (let i = 0; i < pixels.length; i += 4) {
+    pixels[i] = constrain(pixels[i] * 0.7, 0, 255);
+    pixels[i + 1] = constrain(pixels[i + 1] * 0.7, 0, 255);
+    pixels[i + 2] = constrain(pixels[i + 2] * 0.7, 0, 255);
+  }
+  updatePixels();
+}
+
+// Helper functions for color conversion
+function rgbToHsb(r, g, b) {
+  r /= 255;
+  g /= 255;
+  b /= 255;
+  
+  let maxVal = Math.max(r, g, b);
+  let minVal = Math.min(r, g, b);
+  let delta = maxVal - minVal;
+  
+  let h = 0;
+  if (delta !== 0) {
+    if (maxVal === r) {
+      h = ((g - b) / delta) % 6;
+    } else if (maxVal === g) {
+      h = (b - r) / delta + 2;
+    } else {
+      h = (r - g) / delta + 4;
+    }
+  }
+  h = round(h * 60);
+  if (h < 0) h += 360;
+  
+  let s = maxVal === 0 ? 0 : delta / maxVal;
+  let v = maxVal;
+  
+  return [round(h * 255 / 360), round(s * 255), round(v * 255)];
+}
+
+function hsbToRgb(h, s, v) {
+  h = (h / 255) * 360;
+  s = s / 255;
+  v = v / 255;
+  
+  let c = v * s;
+  let x = c * (1 - Math.abs((h / 60) % 2 - 1));
+  let m = v - c;
+  
+  let r = 0, g = 0, b = 0;
+  
+  if (h >= 0 && h < 60) {
+    r = c; g = x; b = 0;
+  } else if (h >= 60 && h < 120) {
+    r = x; g = c; b = 0;
+  } else if (h >= 120 && h < 180) {
+    r = 0; g = c; b = x;
+  } else if (h >= 180 && h < 240) {
+    r = 0; g = x; b = c;
+  } else if (h >= 240 && h < 300) {
+    r = x; g = 0; b = c;
+  } else if (h >= 300 && h < 360) {
+    r = c; g = 0; b = x;
+  }
+  
+  return [
+    round((r + m) * 255),
+    round((g + m) * 255),
+    round((b + m) * 255)
+  ];
 }
 
 function drawAnimation() {
