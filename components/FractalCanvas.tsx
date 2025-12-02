@@ -95,7 +95,7 @@ export default function FractalCanvas({
     for (let i = 0; i < numStrokes; i++) {
       const strokeColor = getStrokeColor(p);
       if (settings.colorMode === 'rainbow') {
-        p.colorMode(p.HSB, 255, 255);
+        p.colorMode(p.HSB, 255, 255, 255, 255);
         const hue = p.map(i, 0, numStrokes, 0, 255);
         p.stroke(hue, 255, 255);
       } else {
@@ -178,7 +178,7 @@ export default function FractalCanvas({
         const strokeColor = getStrokeColor(p);
 
         if (settings.colorMode === 'rainbow') {
-          p.colorMode(p.HSB, 255, 255);
+          p.colorMode(p.HSB, 255, 255, 255, 255);
           p.stroke(strokeColor[0], strokeColor[1], strokeColor[2], strokeColor[3]);
         } else {
           p.colorMode(p.RGB);
@@ -208,6 +208,293 @@ export default function FractalCanvas({
       p.text('Click and drag', p.width / 2, p.height / 2);
       p.pop();
     }
+
+    // Apply photographic filters
+    if (settings.filter !== 'none') {
+      applyFilter(p, settings.filter);
+    }
+  };
+
+  const applyFilter = (p: p5, filterType: string) => {
+    switch (filterType) {
+      case 'grayscale':
+        p.filter(p.GRAY);
+        break;
+      case 'invert':
+        p.filter(p.INVERT);
+        break;
+      case 'blur':
+        p.filter(p.BLUR, 1);
+        break;
+      case 'posterize':
+        p.filter(p.POSTERIZE, 4);
+        break;
+      case 'threshold':
+        p.filter(p.THRESHOLD);
+        break;
+      case 'sepia':
+        applySepiaFilter(p);
+        break;
+      case 'vintage':
+        applyVintageFilter(p);
+        break;
+      case 'blackwhite':
+        applyBlackWhiteFilter(p);
+        break;
+      case 'highcontrast':
+        applyHighContrastFilter(p);
+        break;
+      case 'sharpen':
+        applySharpenFilter(p);
+        break;
+      case 'saturate':
+        applySaturateFilter(p);
+        break;
+      case 'desaturate':
+        applyDesaturateFilter(p);
+        break;
+      case 'brighten':
+        applyBrightenFilter(p);
+        break;
+      case 'darken':
+        applyDarkenFilter(p);
+        break;
+    }
+  };
+
+  const applySepiaFilter = (p: p5) => {
+    p.loadPixels();
+    for (let i = 0; i < p.pixels.length; i += 4) {
+      const r = p.pixels[i];
+      const g = p.pixels[i + 1];
+      const b = p.pixels[i + 2];
+
+      const tr = 0.393 * r + 0.769 * g + 0.189 * b;
+      const tg = 0.349 * r + 0.686 * g + 0.168 * b;
+      const tb = 0.272 * r + 0.534 * g + 0.131 * b;
+
+      p.pixels[i] = p.constrain(tr, 0, 255);
+      p.pixels[i + 1] = p.constrain(tg, 0, 255);
+      p.pixels[i + 2] = p.constrain(tb, 0, 255);
+    }
+    p.updatePixels();
+  };
+
+  const applyVintageFilter = (p: p5) => {
+    p.loadPixels();
+    for (let i = 0; i < p.pixels.length; i += 4) {
+      const r = p.pixels[i];
+      const g = p.pixels[i + 1];
+      const b = p.pixels[i + 2];
+
+      const tr = r * 1.1 + 20;
+      const tg = g * 0.95 + 10;
+      const tb = b * 0.9;
+
+      const x = (i / 4) % p.width;
+      const y = Math.floor(i / 4 / p.width);
+      const distFromCenter = p.dist(x, y, p.width / 2, p.height / 2);
+      const maxDist = p.dist(0, 0, p.width / 2, p.height / 2);
+      const vignette = 1 - (distFromCenter / maxDist) * 0.3;
+
+      p.pixels[i] = p.constrain(tr * vignette, 0, 255);
+      p.pixels[i + 1] = p.constrain(tg * vignette, 0, 255);
+      p.pixels[i + 2] = p.constrain(tb * vignette, 0, 255);
+    }
+    p.updatePixels();
+  };
+
+  const applyBlackWhiteFilter = (p: p5) => {
+    p.loadPixels();
+    for (let i = 0; i < p.pixels.length; i += 4) {
+      const r = p.pixels[i];
+      const g = p.pixels[i + 1];
+      const b = p.pixels[i + 2];
+
+      const gray = (r + g + b) / 3;
+      const bw = gray > 127 ? 255 : 0;
+
+      p.pixels[i] = bw;
+      p.pixels[i + 1] = bw;
+      p.pixels[i + 2] = bw;
+    }
+    p.updatePixels();
+  };
+
+  const applyHighContrastFilter = (p: p5) => {
+    p.loadPixels();
+    for (let i = 0; i < p.pixels.length; i += 4) {
+      const r = p.pixels[i];
+      const g = p.pixels[i + 1];
+      const b = p.pixels[i + 2];
+
+      const factor = 1.5;
+      p.pixels[i] = p.constrain((r - 128) * factor + 128, 0, 255);
+      p.pixels[i + 1] = p.constrain((g - 128) * factor + 128, 0, 255);
+      p.pixels[i + 2] = p.constrain((b - 128) * factor + 128, 0, 255);
+    }
+    p.updatePixels();
+  };
+
+  const applySharpenFilter = (p: p5) => {
+    const tempPixels = [...p.pixels];
+    const kernel = [0, -1, 0, -1, 5, -1, 0, -1, 0];
+
+    p.loadPixels();
+    for (let y = 1; y < p.height - 1; y++) {
+      for (let x = 1; x < p.width - 1; x++) {
+        let r = 0,
+          g = 0,
+          b = 0;
+        let idx = 0;
+
+        for (let ky = -1; ky <= 1; ky++) {
+          for (let kx = -1; kx <= 1; kx++) {
+            const px = (y + ky) * p.width + (x + kx);
+            const pidx = px * 4;
+            const weight = kernel[idx];
+
+            r += tempPixels[pidx] * weight;
+            g += tempPixels[pidx + 1] * weight;
+            b += tempPixels[pidx + 2] * weight;
+
+            idx++;
+          }
+        }
+
+        const pidx = (y * p.width + x) * 4;
+        p.pixels[pidx] = p.constrain(r, 0, 255);
+        p.pixels[pidx + 1] = p.constrain(g, 0, 255);
+        p.pixels[pidx + 2] = p.constrain(b, 0, 255);
+      }
+    }
+    p.updatePixels();
+  };
+
+  const rgbToHsb = (r: number, g: number, b: number): [number, number, number] => {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+
+    const maxVal = Math.max(r, g, b);
+    const minVal = Math.min(r, g, b);
+    const delta = maxVal - minVal;
+
+    let h = 0;
+    if (delta !== 0) {
+      if (maxVal === r) {
+        h = ((g - b) / delta) % 6;
+      } else if (maxVal === g) {
+        h = (b - r) / delta + 2;
+      } else {
+        h = (r - g) / delta + 4;
+      }
+    }
+    h = Math.round(h * 60);
+    if (h < 0) h += 360;
+
+    const s = maxVal === 0 ? 0 : delta / maxVal;
+    const v = maxVal;
+
+    return [Math.round((h * 255) / 360), Math.round(s * 255), Math.round(v * 255)];
+  };
+
+  const hsbToRgb = (h: number, s: number, v: number): [number, number, number] => {
+    h = (h / 255) * 360;
+    s = s / 255;
+    v = v / 255;
+
+    const c = v * s;
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    const m = v - c;
+
+    let r = 0,
+      g = 0,
+      b = 0;
+
+    if (h >= 0 && h < 60) {
+      r = c;
+      g = x;
+      b = 0;
+    } else if (h >= 60 && h < 120) {
+      r = x;
+      g = c;
+      b = 0;
+    } else if (h >= 120 && h < 180) {
+      r = 0;
+      g = c;
+      b = x;
+    } else if (h >= 180 && h < 240) {
+      r = 0;
+      g = x;
+      b = c;
+    } else if (h >= 240 && h < 300) {
+      r = x;
+      g = 0;
+      b = c;
+    } else if (h >= 300 && h < 360) {
+      r = c;
+      g = 0;
+      b = x;
+    }
+
+    return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)];
+  };
+
+  const applySaturateFilter = (p: p5) => {
+    p.loadPixels();
+    for (let i = 0; i < p.pixels.length; i += 4) {
+      const r = p.pixels[i];
+      const g = p.pixels[i + 1];
+      const b = p.pixels[i + 2];
+
+      const [h, s, v] = rgbToHsb(r, g, b);
+      const newS = p.constrain(s * 1.5, 0, 255);
+      const [newR, newG, newB] = hsbToRgb(h, newS, v);
+
+      p.pixels[i] = newR;
+      p.pixels[i + 1] = newG;
+      p.pixels[i + 2] = newB;
+    }
+    p.updatePixels();
+  };
+
+  const applyDesaturateFilter = (p: p5) => {
+    p.loadPixels();
+    for (let i = 0; i < p.pixels.length; i += 4) {
+      const r = p.pixels[i];
+      const g = p.pixels[i + 1];
+      const b = p.pixels[i + 2];
+
+      const [h, s, v] = rgbToHsb(r, g, b);
+      const newS = p.constrain(s * 0.5, 0, 255);
+      const [newR, newG, newB] = hsbToRgb(h, newS, v);
+
+      p.pixels[i] = newR;
+      p.pixels[i + 1] = newG;
+      p.pixels[i + 2] = newB;
+    }
+    p.updatePixels();
+  };
+
+  const applyBrightenFilter = (p: p5) => {
+    p.loadPixels();
+    for (let i = 0; i < p.pixels.length; i += 4) {
+      p.pixels[i] = p.constrain(p.pixels[i] * 1.3, 0, 255);
+      p.pixels[i + 1] = p.constrain(p.pixels[i + 1] * 1.3, 0, 255);
+      p.pixels[i + 2] = p.constrain(p.pixels[i + 2] * 1.3, 0, 255);
+    }
+    p.updatePixels();
+  };
+
+  const applyDarkenFilter = (p: p5) => {
+    p.loadPixels();
+    for (let i = 0; i < p.pixels.length; i += 4) {
+      p.pixels[i] = p.constrain(p.pixels[i] * 0.7, 0, 255);
+      p.pixels[i + 1] = p.constrain(p.pixels[i + 1] * 0.7, 0, 255);
+      p.pixels[i + 2] = p.constrain(p.pixels[i + 2] * 0.7, 0, 255);
+    }
+    p.updatePixels();
   };
 
   const applySecondaryEffect = (p: p5) => {
@@ -240,7 +527,7 @@ export default function FractalCanvas({
     p.noFill();
     const strokeColor = getStrokeColor(p);
     if (settings.colorMode === 'rainbow') {
-      p.colorMode(p.HSB, 255, 255);
+      p.colorMode(p.HSB, 255, 255, 255, 255);
       p.stroke(strokeColor[0], strokeColor[1], strokeColor[2], 50);
     } else {
       p.colorMode(p.RGB);
@@ -268,7 +555,7 @@ export default function FractalCanvas({
     xoffRef.current += 1;
     const strokeColor = getStrokeColor(p);
     if (settings.colorMode === 'rainbow') {
-      p.colorMode(p.HSB, 255, 255);
+      p.colorMode(p.HSB, 255, 255, 255, 255);
       p.stroke(strokeColor[0], strokeColor[1], strokeColor[2], 80);
     } else {
       p.colorMode(p.RGB);
@@ -342,7 +629,7 @@ export default function FractalCanvas({
       xoffRef.current += 0.5;
       const strokeColor = getStrokeColor(p);
       if (settings.colorMode === 'rainbow') {
-        p.colorMode(p.HSB, 255, 255);
+        p.colorMode(p.HSB, 255, 255, 255, 255);
         p.stroke(strokeColor[0], strokeColor[1], strokeColor[2], 150 - layer * 30);
       } else {
         p.colorMode(p.RGB);
@@ -382,7 +669,7 @@ export default function FractalCanvas({
     xoffRef.current += 1;
     const strokeColor = getStrokeColor(p);
     if (settings.colorMode === 'rainbow') {
-      p.colorMode(p.HSB, 255, 255);
+      p.colorMode(p.HSB, 255, 255, 255, 255);
       p.stroke(strokeColor[0], strokeColor[1], strokeColor[2], 100);
     } else {
       p.colorMode(p.RGB);
@@ -437,7 +724,7 @@ export default function FractalCanvas({
     xoffRef.current += 1;
     const strokeColor = getStrokeColor(p);
     if (settings.colorMode === 'rainbow') {
-      p.colorMode(p.HSB, 255, 255);
+      p.colorMode(p.HSB, 255, 255, 255, 255);
       p.stroke(strokeColor[0], strokeColor[1], strokeColor[2], 200);
     } else {
       p.colorMode(p.RGB);
@@ -510,7 +797,7 @@ export default function FractalCanvas({
     xoffRef.current += 1;
     const strokeColor = getStrokeColor(p);
     if (settings.colorMode === 'rainbow') {
-      p.colorMode(p.HSB, 255, 255);
+      p.colorMode(p.HSB, 255, 255, 255, 255);
       p.stroke(strokeColor[0], strokeColor[1], strokeColor[2], 150);
     } else {
       p.colorMode(p.RGB);
@@ -721,7 +1008,7 @@ export default function FractalCanvas({
   return (
     <div className="flex-1 relative overflow-hidden rounded-xl flex justify-center items-center w-full h-full md:min-w-[400px]">
       <div className="[&>canvas]:block [&>canvas]:border-2 [&>canvas]:border-white/20 [&>canvas]:rounded-xl [&>canvas]:shadow-[0_8px_32px_rgba(0,0,0,0.4),0_0_20px_rgba(255,255,255,0.1)] [&>canvas]:backdrop-blur-[10px] [&>canvas]:max-w-full [&>canvas]:max-h-full">
-        <Sketch setup={setup} draw={draw} />
+        <Sketch setup={setup as any} draw={draw as any} />
       </div>
     </div>
   );

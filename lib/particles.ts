@@ -36,7 +36,7 @@ export class ParticleClass implements Particle {
   display(p: p5, symmetry: number, currentColorMode: ColorMode) {
     p.push();
     if (currentColorMode === 'rainbow') {
-      p.colorMode(p.HSB, 255, 255);
+      p.colorMode(p.HSB, 255, 255, 255, 255);
       p.stroke(this.color[0], this.color[1], this.color[2], this.lifespan);
     } else {
       p.colorMode(p.RGB);
@@ -98,7 +98,7 @@ export class FlowerParticleClass implements FlowerParticle {
     const alpha = this.lifespan * (0.5 + p.sin(this.twinkle) * 0.5);
 
     if (currentColorMode === 'rainbow') {
-      p.colorMode(p.HSB, 255, 255);
+      p.colorMode(p.HSB, 255, 255, 255, 255);
       p.fill(this.color[0], 200, 255, alpha);
       p.stroke(this.color[0], 255, 255, alpha * 0.5);
     } else {
@@ -240,7 +240,7 @@ export class FlowerClass implements Flower {
     // Draw center
     p.push();
     if (currentColorMode === 'rainbow') {
-      p.colorMode(p.HSB, 255, 255);
+      p.colorMode(p.HSB, 255, 255, 255, 255);
       p.fill(strokeColor[0], 150, 200, alpha * 0.9);
       p.stroke(strokeColor[0], 200, 255, alpha);
     } else {
@@ -280,7 +280,7 @@ export class FlowerClass implements Flower {
       p.rotate(i * (360 / numPetals));
 
       if (currentColorMode === 'rainbow') {
-        p.colorMode(p.HSB, 255, 255);
+        p.colorMode(p.HSB, 255, 255, 255, 255);
         const h = strokeColor[0];
         p.fill(h, 120 - layer * 20, 255, alpha * 0.8 - layer * 15);
         p.stroke(h, 200, 255, alpha * 0.9 - layer * 20);
@@ -327,7 +327,7 @@ export class FlowerClass implements Flower {
     // Lily center with stamens
     p.push();
     if (currentColorMode === 'rainbow') {
-      p.colorMode(p.HSB, 255, 255);
+      p.colorMode(p.HSB, 255, 255, 255, 255);
       p.fill(strokeColor[0], 255, 200, alpha);
       p.stroke(strokeColor[0], 200, 255, alpha);
     } else {
@@ -359,7 +359,7 @@ export class FlowerClass implements Flower {
       p.rotate(i * (360 / numPetals) + this.rotation * 0.3);
 
       if (currentColorMode === 'rainbow') {
-        p.colorMode(p.HSB, 255, 255);
+        p.colorMode(p.HSB, 255, 255, 255, 255);
         p.fill(strokeColor[0], 100, 255, alpha * 0.9);
         p.stroke(strokeColor[0], 180, 255, alpha);
       } else {
@@ -390,7 +390,7 @@ export class FlowerClass implements Flower {
     // Lotus center
     p.push();
     if (currentColorMode === 'rainbow') {
-      p.colorMode(p.HSB, 255, 255);
+      p.colorMode(p.HSB, 255, 255, 255, 255);
       p.fill(strokeColor[0], 100, 180, alpha);
       p.stroke(strokeColor[0], 150, 200, alpha);
     } else {
@@ -418,7 +418,7 @@ export class FlowerClass implements Flower {
         p.rotate(i * (360 / layerPetals));
 
         if (currentColorMode === 'rainbow') {
-          p.colorMode(p.HSB, 255, 255);
+          p.colorMode(p.HSB, 255, 255, 255, 255);
           const h = (strokeColor[0] + layer * 10) % 255;
           p.fill(h, 80 + layer * 20, 255, alpha * 0.85 - layer * 10);
           p.stroke(h, 150, 255, alpha * 0.9);
@@ -464,7 +464,7 @@ export class FlowerClass implements Flower {
     // Cherry blossom center
     p.push();
     if (currentColorMode === 'rainbow') {
-      p.colorMode(p.HSB, 255, 255);
+      p.colorMode(p.HSB, 255, 255, 255, 255);
       p.fill(strokeColor[0], 100, 255, alpha);
     } else {
       p.colorMode(p.RGB);
@@ -494,7 +494,7 @@ export class FlowerClass implements Flower {
       p.rotate(i * (360 / numPetals) + this.rotation * 0.4);
 
       if (currentColorMode === 'rainbow') {
-        p.colorMode(p.HSB, 255, 255);
+        p.colorMode(p.HSB, 255, 255, 255, 255);
         p.fill(strokeColor[0], 50, 255, alpha * 0.85);
         p.stroke(strokeColor[0], 100, 255, alpha);
       } else {
@@ -540,7 +540,7 @@ export class FlowerClass implements Flower {
         p.rotate(i * (360 / layerPetals));
 
         if (currentColorMode === 'rainbow') {
-          p.colorMode(p.HSB, 255, 255);
+          p.colorMode(p.HSB, 255, 255, 255, 255);
           const h = (strokeColor[0] + layer * 15) % 255;
           p.fill(h, 200 - layer * 20, 255, alpha * 0.9 - layer * 10);
           p.stroke(h, 255, 255, alpha * 0.95);
@@ -566,7 +566,7 @@ export class FlowerClass implements Flower {
     // Dahlia center
     p.push();
     if (currentColorMode === 'rainbow') {
-      p.colorMode(p.HSB, 255, 255);
+      p.colorMode(p.HSB, 255, 255, 255, 255);
       p.fill(strokeColor[0], 255, 200, alpha);
     } else {
       p.colorMode(p.RGB);
