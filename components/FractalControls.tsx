@@ -333,6 +333,24 @@ export default function FractalControls({
             </div>
           )}
         </AccordionSection>
+
+        <AccordionSection title="Performance" icon="fa-rocket" defaultOpen={false}>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="gpuAcceleration"
+              checked={settings.gpuAcceleration}
+              onChange={(e) => onSettingsChange({ gpuAcceleration: e.target.checked })}
+              className="w-5 h-5 accent-[#4ecdc4] cursor-pointer rounded"
+            />
+            <label htmlFor="gpuAcceleration" className="text-white/90 font-medium text-xs cursor-pointer select-none">
+              GPU Acceleration
+            </label>
+          </div>
+          <p className="text-xs text-white/60 mt-1 leading-relaxed">
+            Uses WebGL shaders for faster filter processing and rendering. Best for complex animations and filters.
+          </p>
+        </AccordionSection>
       </div>
     </>
   );

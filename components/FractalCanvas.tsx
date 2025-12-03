@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import type p5 from 'p5';
 import type { FractalSettings } from '@/types';
 import { ParticleClass, FlowerParticleClass, FlowerClass } from '@/lib/particles';
+import { GPUFilterProcessor } from '@/lib/gpuFilters';
 
 const Sketch = dynamic(() => import('react-p5').then((mod) => mod.default), {
   ssr: false,
@@ -42,6 +43,7 @@ export default function FractalCanvas({
   });
   const showInstructionsRef = useRef(true);
   const p5InstanceRef = useRef<p5 | null>(null);
+  const gpuFilterProcessorRef = useRef<GPUFilterProcessor | null>(null);
 
   const getStrokeColor = (p: p5): number[] => {
     const { colorMode, solidColor } = settings;
@@ -140,6 +142,11 @@ export default function FractalCanvas({
     p.angleMode(p.DEGREES);
     p.background(0);
     p5InstanceRef.current = p;
+
+    // Initialize GPU filter processor
+    if (settings.gpuAcceleration && GPUFilterProcessor.isAvailable()) {
+      gpuFilterProcessorRef.current = new GPUFilterProcessor(p);
+    }
   };
 
   const draw = (p: p5) => {
@@ -211,7 +218,16 @@ export default function FractalCanvas({
 
     // Apply photographic filters
     if (settings.filter !== 'none') {
-      applyFilter(p, settings.filter);
+      // Try GPU acceleration first if enabled
+      let gpuApplied = false;
+      if (settings.gpuAcceleration && gpuFilterProcessorRef.current) {
+        gpuApplied = gpuFilterProcessorRef.current.applyFilter(settings.filter);
+      }
+
+      // Fall back to CPU if GPU didn't handle it
+      if (!gpuApplied) {
+        applyFilter(p, settings.filter);
+      }
     }
   };
 
@@ -1004,6 +1020,32 @@ export default function FractalCanvas({
       window.removeEventListener('save-fractal', handleSave);
     };
   }, [settings]);
+
+  // Handle GPU acceleration changes
+  useEffect(() => {
+    if (!p5InstanceRef.current) return;
+
+    // Initialize or dispose GPU filter processor based on settings
+    if (settings.gpuAcceleration && GPUFilterProcessor.isAvailable()) {
+      if (!gpuFilterProcessorRef.current) {
+        gpuFilterProcessorRef.current = new GPUFilterProcessor(p5InstanceRef.current);
+      }
+    } else {
+      if (gpuFilterProcessorRef.current) {
+        gpuFilterProcessorRef.current.dispose();
+        gpuFilterProcessorRef.current = null;
+      }
+    }
+  }, [settings.gpuAcceleration]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (gpuFilterProcessorRef.current) {
+        gpuFilterProcessorRef.current.dispose();
+      }
+    };
+  }, []);
 
   return (
     <div className="flex-1 relative overflow-hidden rounded-xl flex justify-center items-center w-full h-full md:min-w-[400px]">

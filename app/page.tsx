@@ -20,6 +20,7 @@ export default function Home() {
     trailsEnabled: false,
     flowerType: 'rose',
     flowerCount: 3,
+    gpuAcceleration: true,
   });
 
   const handleSettingsChange = (newSettings: Partial<FractalSettings>) => {

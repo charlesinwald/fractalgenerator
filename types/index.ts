@@ -19,6 +19,7 @@ export interface FractalSettings {
   trailsEnabled: boolean;
   flowerType: FlowerType;
   flowerCount: number;
+  gpuAcceleration: boolean;
 }
 
 export interface Particle {
