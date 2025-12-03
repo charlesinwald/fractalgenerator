@@ -440,65 +440,65 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@next/env@npm:16.0.6":
-  version: 16.0.6
-  resolution: "@next/env@npm:16.0.6"
-  checksum: 10c0/ca0f1c4ecb6dd41beaa0a2fcc755dc2a66a0ca1a64eba47d42171afbefc67534366a4f544674381442643bf9d78ceefcf8dab5557618ef560814efefebc674d5
+"@next/env@npm:16.0.7":
+  version: 16.0.7
+  resolution: "@next/env@npm:16.0.7"
+  checksum: 10c0/5bbb4360ae6b0753de83f70700295c09427f5414f6765c7371fee0894de2a614364a2e9b4ec7b7e3451d56334026bafec6d28a21222a2fa7ecaa27f0a9421cc7
   languageName: node
   linkType: hard
 
-"@next/swc-darwin-arm64@npm:16.0.6":
-  version: 16.0.6
-  resolution: "@next/swc-darwin-arm64@npm:16.0.6"
+"@next/swc-darwin-arm64@npm:16.0.7":
+  version: 16.0.7
+  resolution: "@next/swc-darwin-arm64@npm:16.0.7"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@next/swc-darwin-x64@npm:16.0.6":
-  version: 16.0.6
-  resolution: "@next/swc-darwin-x64@npm:16.0.6"
+"@next/swc-darwin-x64@npm:16.0.7":
+  version: 16.0.7
+  resolution: "@next/swc-darwin-x64@npm:16.0.7"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@next/swc-linux-arm64-gnu@npm:16.0.6":
-  version: 16.0.6
-  resolution: "@next/swc-linux-arm64-gnu@npm:16.0.6"
+"@next/swc-linux-arm64-gnu@npm:16.0.7":
+  version: 16.0.7
+  resolution: "@next/swc-linux-arm64-gnu@npm:16.0.7"
   conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@next/swc-linux-arm64-musl@npm:16.0.6":
-  version: 16.0.6
-  resolution: "@next/swc-linux-arm64-musl@npm:16.0.6"
+"@next/swc-linux-arm64-musl@npm:16.0.7":
+  version: 16.0.7
+  resolution: "@next/swc-linux-arm64-musl@npm:16.0.7"
   conditions: os=linux & cpu=arm64 & libc=musl
   languageName: node
   linkType: hard
 
-"@next/swc-linux-x64-gnu@npm:16.0.6":
-  version: 16.0.6
-  resolution: "@next/swc-linux-x64-gnu@npm:16.0.6"
+"@next/swc-linux-x64-gnu@npm:16.0.7":
+  version: 16.0.7
+  resolution: "@next/swc-linux-x64-gnu@npm:16.0.7"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@next/swc-linux-x64-musl@npm:16.0.6":
-  version: 16.0.6
-  resolution: "@next/swc-linux-x64-musl@npm:16.0.6"
+"@next/swc-linux-x64-musl@npm:16.0.7":
+  version: 16.0.7
+  resolution: "@next/swc-linux-x64-musl@npm:16.0.7"
   conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"@next/swc-win32-arm64-msvc@npm:16.0.6":
-  version: 16.0.6
-  resolution: "@next/swc-win32-arm64-msvc@npm:16.0.6"
+"@next/swc-win32-arm64-msvc@npm:16.0.7":
+  version: 16.0.7
+  resolution: "@next/swc-win32-arm64-msvc@npm:16.0.7"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@next/swc-win32-x64-msvc@npm:16.0.6":
-  version: 16.0.6
-  resolution: "@next/swc-win32-x64-msvc@npm:16.0.6"
+"@next/swc-win32-x64-msvc@npm:16.0.7":
+  version: 16.0.7
+  resolution: "@next/swc-win32-x64-msvc@npm:16.0.7"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
@@ -1322,12 +1322,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"baseline-browser-mapping@npm:^2.8.25":
-  version: 2.8.32
-  resolution: "baseline-browser-mapping@npm:2.8.32"
+"baseline-browser-mapping@npm:^2.9.0":
+  version: 2.9.0
+  resolution: "baseline-browser-mapping@npm:2.9.0"
   bin:
     baseline-browser-mapping: dist/cli.js
-  checksum: 10c0/6c4aa0338ad177e946a27412de11769fb6474389a59cc03e13e0538d7285a94052a11525d46bb605ddb913a0c8a1180292d6f05cd4d6bc05bbf597c26bf5ce66
+  checksum: 10c0/cc2c4beaaa6310e57d55c0b38767b7d833cad17779a51bd2f1db7c8fb50d86629fa065cf65b9333bbe1d909270a084bd2177f0fbc832633b273504a8c805ab9c
   languageName: node
   linkType: hard
 
@@ -1385,17 +1385,17 @@ __metadata:
   linkType: hard
 
 "browserslist@npm:^4.26.3, browserslist@npm:^4.27.0":
-  version: 4.28.0
-  resolution: "browserslist@npm:4.28.0"
+  version: 4.28.1
+  resolution: "browserslist@npm:4.28.1"
   dependencies:
-    baseline-browser-mapping: "npm:^2.8.25"
-    caniuse-lite: "npm:^1.0.30001754"
-    electron-to-chromium: "npm:^1.5.249"
+    baseline-browser-mapping: "npm:^2.9.0"
+    caniuse-lite: "npm:^1.0.30001759"
+    electron-to-chromium: "npm:^1.5.263"
     node-releases: "npm:^2.0.27"
-    update-browserslist-db: "npm:^1.1.4"
+    update-browserslist-db: "npm:^1.2.0"
   bin:
     browserslist: cli.js
-  checksum: 10c0/4284fd568f7d40a496963083860d488cb2a89fb055b6affd316bebc59441fec938e090b3e62c0ee065eb0bc88cd1bc145f4300a16c75f3f565621c5823715ae1
+  checksum: 10c0/545a5fa9d7234e3777a7177ec1e9134bb2ba60a69e6b95683f6982b1473aad347c77c1264ccf2ac5dea609a9731fbfbda6b85782bdca70f80f86e28a402504bd
   languageName: node
   linkType: hard
 
@@ -1461,10 +1461,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"caniuse-lite@npm:^1.0.30001579, caniuse-lite@npm:^1.0.30001754":
-  version: 1.0.30001757
-  resolution: "caniuse-lite@npm:1.0.30001757"
-  checksum: 10c0/3ccb71fa2bf1f8c96ff1bf9b918b08806fed33307e20a3ce3259155fda131eaf96cfcd88d3d309c8fd7f8285cc71d89a3b93648a1c04814da31c301f98508d42
+"caniuse-lite@npm:^1.0.30001579, caniuse-lite@npm:^1.0.30001754, caniuse-lite@npm:^1.0.30001759":
+  version: 1.0.30001759
+  resolution: "caniuse-lite@npm:1.0.30001759"
+  checksum: 10c0/b0f415960ba34995cda18e0d25c4e602f6917b9179290a76bdd0311423505b78cc93e558a90c98a22a1cc6b1781ab720ef6beea24ec7e29a1c1164ca72eac3a2
   languageName: node
   linkType: hard
 
@@ -1733,10 +1733,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron-to-chromium@npm:^1.5.249":
-  version: 1.5.262
-  resolution: "electron-to-chromium@npm:1.5.262"
-  checksum: 10c0/4e4e3a307f662991145fd0bbd9045e17af547987a9dc33c30239b1a7b60874989f9b71c636b6c7d2b9052777344d4358a7cf76924203873a392ea1568bf88e5d
+"electron-to-chromium@npm:^1.5.263":
+  version: 1.5.263
+  resolution: "electron-to-chromium@npm:1.5.263"
+  checksum: 10c0/d9ba38c5e87f4f1c78e64c7dcc2a32f764664cdbab3c576f23cb3d66a1c3ca1836ecfa00768ab4cd921a0832d09f65555f86eadb926f2cfd3fe93d6c57b8f583
   languageName: node
   linkType: hard
 
@@ -2052,14 +2052,14 @@ __metadata:
     "@types/react": "npm:^19.2.7"
     "@types/react-dom": "npm:^19.2.3"
     autoprefixer: "npm:^10.4.22"
-    next: "npm:^16.0.6"
+    next: "npm:^16.0.7"
     postcss: "npm:^8.5.6"
-    react: "npm:^19.2.0"
-    react-dom: "npm:^19.2.0"
+    react: "npm:^19.2.1"
+    react-dom: "npm:^19.2.1"
     react-p5: "npm:^1.4.1"
     tailwindcss: "npm:^4.1.17"
     typescript: "npm:^5.9.3"
-    webpack: "npm:^5.102.1"
+    webpack: "npm:^5.103.0"
     webpack-cli: "npm:^6.0.1"
     webpack-dev-server: "npm:^5.2.2"
   languageName: unknown
@@ -3036,19 +3036,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"next@npm:^16.0.6":
-  version: 16.0.6
-  resolution: "next@npm:16.0.6"
+"next@npm:^16.0.7":
+  version: 16.0.7
+  resolution: "next@npm:16.0.7"
   dependencies:
-    "@next/env": "npm:16.0.6"
-    "@next/swc-darwin-arm64": "npm:16.0.6"
-    "@next/swc-darwin-x64": "npm:16.0.6"
-    "@next/swc-linux-arm64-gnu": "npm:16.0.6"
-    "@next/swc-linux-arm64-musl": "npm:16.0.6"
-    "@next/swc-linux-x64-gnu": "npm:16.0.6"
-    "@next/swc-linux-x64-musl": "npm:16.0.6"
-    "@next/swc-win32-arm64-msvc": "npm:16.0.6"
-    "@next/swc-win32-x64-msvc": "npm:16.0.6"
+    "@next/env": "npm:16.0.7"
+    "@next/swc-darwin-arm64": "npm:16.0.7"
+    "@next/swc-darwin-x64": "npm:16.0.7"
+    "@next/swc-linux-arm64-gnu": "npm:16.0.7"
+    "@next/swc-linux-arm64-musl": "npm:16.0.7"
+    "@next/swc-linux-x64-gnu": "npm:16.0.7"
+    "@next/swc-linux-x64-musl": "npm:16.0.7"
+    "@next/swc-win32-arm64-msvc": "npm:16.0.7"
+    "@next/swc-win32-x64-msvc": "npm:16.0.7"
     "@swc/helpers": "npm:0.5.15"
     caniuse-lite: "npm:^1.0.30001579"
     postcss: "npm:8.4.31"
@@ -3091,14 +3091,14 @@ __metadata:
       optional: true
   bin:
     next: dist/bin/next
-  checksum: 10c0/974da48dfc9b54c9c7a915b9f311010397a0d530bf5443adbd92c5586fc42ea7cd8e6378484699ac3c41764f8fb0ed7d5d794aeef54125c753b1cfd15fc4f633
+  checksum: 10c0/72003fed0f5b690c91ae1a0cc59317691ca1976b46809557a93e00a43e55d4158a256b1a46da6cd7506e699d74aa0cf4e973ec5a35ceabbdd9a1955b507ec85d
   languageName: node
   linkType: hard
 
 "node-forge@npm:^1":
-  version: 1.3.2
-  resolution: "node-forge@npm:1.3.2"
-  checksum: 10c0/1def35652c93a588718a6d0d0b4f33e3e7de283aa6f4c00d01d1605d6ccce23fb3b59bcbfb6434014acd23a251cfcc2736052b406f53d94e1b19c09d289d0176
+  version: 1.3.3
+  resolution: "node-forge@npm:1.3.3"
+  checksum: 10c0/9c6f53b0ebb34865872cf62a35b0aef8fb337e2efc766626c2e3a0040f4c02933bf29a62ba999eb44a2aca73bd512c4eda22705a47b94654b9fb8ed53db9a1db
   languageName: node
   linkType: hard
 
@@ -3430,14 +3430,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:^19.2.0":
-  version: 19.2.0
-  resolution: "react-dom@npm:19.2.0"
+"react-dom@npm:^19.2.1":
+  version: 19.2.1
+  resolution: "react-dom@npm:19.2.1"
   dependencies:
     scheduler: "npm:^0.27.0"
   peerDependencies:
-    react: ^19.2.0
-  checksum: 10c0/fa2cae05248d01288e91523b590ce4e7635b1e13f1344e225f850d722a8da037bf0782f63b1c1d46353334e0c696909b82e582f8cad607948fde6f7646cc18d9
+    react: ^19.2.1
+  checksum: 10c0/e56b6b3d72314df580ca800b70a69a21c6372703c8f45d9b5451ca6519faefb2496d76ffa9c5adb94136d2bbf2fd303d0dfc208a2cd77ede3132877471af9470
   languageName: node
   linkType: hard
 
@@ -3455,10 +3455,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:^19.2.0":
-  version: 19.2.0
-  resolution: "react@npm:19.2.0"
-  checksum: 10c0/1b6d64eacb9324725bfe1e7860cb7a6b8a34bc89a482920765ebff5c10578eb487e6b46b2f0df263bd27a25edbdae2c45e5ea5d81ae61404301c1a7192c38330
+"react@npm:^19.2.1":
+  version: 19.2.1
+  resolution: "react@npm:19.2.1"
+  checksum: 10c0/2b5eaf407abb3db84090434c20d6c5a8e447ab7abcd8fe9eaf1ddc299babcf31284ee9db7ea5671d21c85ac5298bd632fa1a7da1ed78d5b368a537f5e1cd5d62
   languageName: node
   linkType: hard
 
@@ -4258,9 +4258,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"update-browserslist-db@npm:^1.1.4":
-  version: 1.1.4
-  resolution: "update-browserslist-db@npm:1.1.4"
+"update-browserslist-db@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "update-browserslist-db@npm:1.2.0"
   dependencies:
     escalade: "npm:^3.2.0"
     picocolors: "npm:^1.1.1"
@@ -4268,7 +4268,7 @@ __metadata:
     browserslist: ">= 4.21.0"
   bin:
     update-browserslist-db: cli.js
-  checksum: 10c0/db0c9aaecf1258a6acda5e937fc27a7996ccca7a7580a1b4aa8bba6a9b0e283e5e65c49ebbd74ec29288ef083f1b88d4da13e3d4d326c1e5fc55bf72d7390702
+  checksum: 10c0/bfb0893568a65b0573a6459772434f255a28a569a36ce52d5fc45ef2bd17ee5b6ecf6ac6e5e349721e4c86a3f0a36e74812aa7c31f21fd654f3ad6998712ecba
   languageName: node
   linkType: hard
 
@@ -4433,7 +4433,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:^5.102.1":
+"webpack@npm:^5.103.0":
   version: 5.103.0
   resolution: "webpack@npm:5.103.0"
   dependencies:
